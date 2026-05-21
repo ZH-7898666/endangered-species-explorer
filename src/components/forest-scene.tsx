@@ -114,31 +114,31 @@ export function ForestScene({ species, unlockedIds, onSpeciesClick, isVisible }:
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       time += 0.002;
 
-      // Warm golden fog layers
-      for (let i = 0; i < 6; i++) {
+      // Warm golden fog layers — more visible
+      for (let i = 0; i < 8; i++) {
         const x = Math.sin(time * 0.5 + i * 1.2) * canvas.width * 0.3 + canvas.width * 0.5;
-        const y = canvas.height * (0.3 + i * 0.1) + Math.cos(time + i) * 30;
-        const size = 200 + Math.sin(time + i * 0.8) * 60;
+        const y = canvas.height * (0.25 + i * 0.08) + Math.cos(time + i) * 30;
+        const size = 250 + Math.sin(time + i * 0.8) * 80;
 
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(200, 190, 140, 0.035)`);
-        gradient.addColorStop(0.5, `rgba(180, 170, 120, 0.015)`);
-        gradient.addColorStop(1, `rgba(160, 150, 100, 0)`);
+        gradient.addColorStop(0, `rgba(210, 195, 140, 0.05)`);
+        gradient.addColorStop(0.5, `rgba(190, 175, 120, 0.025)`);
+        gradient.addColorStop(1, `rgba(170, 155, 100, 0)`);
         ctx.beginPath();
         ctx.fillStyle = gradient;
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Green mist near ground
-      for (let i = 0; i < 4; i++) {
+      // Green mist near ground — more visible
+      for (let i = 0; i < 5; i++) {
         const x = Math.cos(time * 0.3 + i * 2) * canvas.width * 0.4 + canvas.width * 0.5;
-        const y = canvas.height * 0.85 + Math.sin(time * 0.5 + i) * 20;
-        const size = 300 + Math.sin(time + i) * 50;
+        const y = canvas.height * 0.82 + Math.sin(time * 0.5 + i) * 20;
+        const size = 350 + Math.sin(time + i) * 60;
 
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(140, 170, 100, 0.03)`);
-        gradient.addColorStop(1, `rgba(100, 140, 80, 0)`);
+        gradient.addColorStop(0, `rgba(160, 190, 110, 0.04)`);
+        gradient.addColorStop(1, `rgba(120, 160, 90, 0)`);
         ctx.beginPath();
         ctx.fillStyle = gradient;
         ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -234,12 +234,12 @@ export function ForestScene({ species, unlockedIds, onSpeciesClick, isVisible }:
         <path d="M470,700 L470,350 Q460,335 465,320 Q455,310 462,295 L470,280 L478,295 Q485,310 475,320 Q480,335 470,350 Z" fill="rgba(20,30,18,0.6)" />
       </svg>
 
-      {/* Warm ambient glow from top */}
+      {/* Warm ambient glow from top — more golden */}
       <div
         className="absolute top-0 left-0 right-0 z-[5] pointer-events-none"
         style={{
-          height: '40%',
-          background: 'linear-gradient(to bottom, rgba(200,180,80,0.06) 0%, rgba(180,160,60,0.02) 50%, transparent 100%)',
+          height: '45%',
+          background: 'linear-gradient(to bottom, rgba(220,190,80,0.08) 0%, rgba(200,170,60,0.04) 40%, rgba(180,150,40,0.01) 70%, transparent 100%)',
         }}
       />
 

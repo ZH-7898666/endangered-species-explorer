@@ -129,30 +129,32 @@ body {
   100% { opacity: 0; transform: scale(1.05); }
 }
 
-/* ========== Forest Background — warm twilight forest ========== */
+/* ========== Forest Background — warm golden twilight forest ========== */
 .forest-bg {
   background: linear-gradient(
     180deg,
-    #0e180c 0%,
-    #1a2814 15%,
-    #1e3018 30%,
-    #24381c 45%,
-    #2a3d20 60%,
-    #1e2d16 80%,
-    #162210 100%
+    #1a2210 0%,
+    #243218 12%,
+    #2e4420 25%,
+    #385228 38%,
+    #3a5830 50%,
+    #304a24 65%,
+    #283c1c 80%,
+    #1e2e14 100%
   );
 }
 
 .ocean-bg {
   background: linear-gradient(
     180deg,
-    #081828 0%,
-    #0c2440 15%,
-    #103050 30%,
-    #153a5c 45%,
-    #1a4468 60%,
-    #133855 80%,
-    #0c2a45 100%
+    #0e2a48 0%,
+    #143860 12%,
+    #1a4878 25%,
+    #1e5888 38%,
+    #226498 50%,
+    #1c5890 65%,
+    #154878 80%,
+    #0e3860 100%
   );
 }
 

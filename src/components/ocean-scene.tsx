@@ -128,32 +128,32 @@ export function OceanScene({ species, unlockedIds, onSpeciesClick, isVisible }: 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       time += 0.003;
 
-      // Caustic light from above — brighter, bluer
-      for (let i = 0; i < 16; i++) {
+      // Caustic light from above — brighter, more vivid
+      for (let i = 0; i < 20; i++) {
         const x = (Math.sin(time + i * 0.7) * 0.35 + 0.5) * canvas.width;
-        const y = (Math.cos(time * 0.8 + i * 0.5) * 0.25 + 0.35) * canvas.height;
-        const size = 100 + Math.sin(time + i) * 50;
+        const y = (Math.cos(time * 0.8 + i * 0.5) * 0.25 + 0.3) * canvas.height;
+        const size = 120 + Math.sin(time + i) * 60;
 
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(100, 180, 220, 0.04)`);
-        gradient.addColorStop(0.5, `rgba(80, 140, 200, 0.02)`);
-        gradient.addColorStop(1, `rgba(60, 120, 180, 0)`);
+        gradient.addColorStop(0, `rgba(120, 200, 240, 0.06)`);
+        gradient.addColorStop(0.5, `rgba(100, 180, 230, 0.03)`);
+        gradient.addColorStop(1, `rgba(80, 160, 220, 0)`);
         ctx.beginPath();
         ctx.fillStyle = gradient;
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Bioluminescent blue-purple glows
-      for (let i = 0; i < 8; i++) {
+      // Bioluminescent blue-purple glows — brighter
+      for (let i = 0; i < 10; i++) {
         const x = (Math.cos(time * 0.4 + i * 1.5) * 0.4 + 0.5) * canvas.width;
         const y = (Math.sin(time * 0.3 + i * 0.9) * 0.35 + 0.55) * canvas.height;
-        const size = 60 + Math.sin(time * 0.8 + i) * 25;
+        const size = 80 + Math.sin(time * 0.8 + i) * 30;
 
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(130, 100, 200, 0.04)`);
-        gradient.addColorStop(0.5, `rgba(100, 80, 180, 0.02)`);
-        gradient.addColorStop(1, `rgba(80, 60, 160, 0)`);
+        gradient.addColorStop(0, `rgba(140, 120, 220, 0.06)`);
+        gradient.addColorStop(0.5, `rgba(120, 100, 200, 0.03)`);
+        gradient.addColorStop(1, `rgba(100, 80, 180, 0)`);
         ctx.beginPath();
         ctx.fillStyle = gradient;
         ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -211,12 +211,12 @@ export function OceanScene({ species, unlockedIds, onSpeciesClick, isVisible }: 
         />
       ))}
 
-      {/* Top surface shimmer — lighter, more visible */}
+      {/* Top surface shimmer — more luminous */}
       <div
         className="absolute top-0 left-0 right-0 z-[3] pointer-events-none"
         style={{
-          height: '20%',
-          background: 'linear-gradient(to bottom, rgba(140,200,240,0.08) 0%, rgba(100,170,220,0.03) 50%, transparent 100%)',
+          height: '25%',
+          background: 'linear-gradient(to bottom, rgba(160,220,255,0.12) 0%, rgba(120,190,240,0.05) 50%, transparent 100%)',
         }}
       />
 

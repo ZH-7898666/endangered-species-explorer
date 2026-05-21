@@ -247,7 +247,6 @@ export default function Home() {
       {isCardOpen && selectedSpecies && (
         <SpeciesCard
           species={selectedSpecies}
-          isClosing={isCardClosing}
           onClose={handleCloseCard}
         />
       )}
