@@ -29,7 +29,7 @@
 │   │   ├── species-card.tsx    # 物种科普卡片弹窗（档案/影像双标签页）
 │   │   └── ui/                 # shadcn/ui 组件库
 │   ├── data/
-│   │   └── species.ts          # 16种CITES濒危物种数据（森林8种 + 海洋8种）
+│   │   └── species.ts          # 16种濒危物种数据（森林8种 + 海洋8种）
 │   ├── hooks/
 │   └── lib/
 ├── DESIGN.md                   # 设计规范（色彩、字体、动效、交互规范）
