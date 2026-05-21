@@ -27,6 +27,7 @@ export default function Home() {
   const unlockedCount = currentSpeciesList.filter((s) => unlockedIds.has(s.id)).length;
   const totalCount = currentSpeciesList.length;
 
+  // Allow re-clicking discovered species — they stay visible and clickable
   const handleSpeciesClick = useCallback(
     (species: Species) => {
       if (isCardOpen) return;
@@ -167,7 +168,7 @@ export default function Home() {
             className={`
               px-5 py-2.5 rounded-full
               backdrop-blur-xl border border-white/10
-              ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.7)]' : 'bg-[rgba(10,22,40,0.7)]'}
+              ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.6)]' : 'bg-[rgba(10,22,40,0.6)]'}
               text-white/80 text-sm tracking-wider font-light
             `}
           >
@@ -181,15 +182,15 @@ export default function Home() {
         <div className="absolute bottom-8 left-8">
           <h2
             className={`text-2xl font-light tracking-wide mb-1.5 ${
-              currentScene === 'forest' ? 'text-[#7ba69e]' : 'text-[#B8D8E8]'
+              currentScene === 'forest' ? 'text-[#C8D890]' : 'text-[#B8D8E8]'
             }`}
           >
             {currentScene === 'forest' ? '秘境森林' : '深海海域'}
           </h2>
           <p className="text-white/40 text-sm font-light max-w-64 leading-relaxed">
             {currentScene === 'forest'
-              ? '雾气缭绕的原始密林，荧光光斑中隐藏着珍稀生灵'
-              : '幽深莫测的海底世界，气泡里封存着深海秘密'}
+              ? '暮色中的密林，荧光光斑中隐藏着珍稀生灵'
+              : '幽蓝深海，气泡里封存着来自深渊的秘密'}
           </p>
           <p className="text-white/25 text-xs mt-2 font-light">
             滚轮缩放 · 点击探索 · 拖拽平移
@@ -204,8 +205,8 @@ export default function Home() {
               scene-switch-btn px-5 py-3 rounded-2xl
               border text-sm font-light tracking-wide
               ${currentScene === 'forest'
-                ? 'bg-[rgba(232,200,64,0.15)] border-[rgba(232,200,64,0.3)] text-[#E8C840]'
-                : 'bg-[rgba(30,40,28,0.5)] border-white/10 text-white/50 hover:text-white/70'
+                ? 'bg-[rgba(232,200,64,0.12)] border-[rgba(232,200,64,0.25)] text-[#E8C840]'
+                : 'bg-[rgba(30,40,28,0.4)] border-white/10 text-white/50 hover:text-white/70'
               }
             `}
           >
@@ -217,8 +218,8 @@ export default function Home() {
               scene-switch-btn px-5 py-3 rounded-2xl
               border text-sm font-light tracking-wide
               ${currentScene === 'ocean'
-                ? 'bg-[rgba(184,216,232,0.15)] border-[rgba(184,216,232,0.3)] text-[#B8D8E8]'
-                : 'bg-[rgba(10,22,40,0.5)] border-white/10 text-white/50 hover:text-white/70'
+                ? 'bg-[rgba(140,180,220,0.12)] border-[rgba(140,180,220,0.25)] text-[#B8D8E8]'
+                : 'bg-[rgba(10,22,40,0.4)] border-white/10 text-white/50 hover:text-white/70'
               }
             `}
           >
@@ -233,7 +234,7 @@ export default function Home() {
               className={`
                 px-3 py-1.5 rounded-full text-xs text-white/50
                 backdrop-blur-xl border border-white/10
-                ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.7)]' : 'bg-[rgba(10,22,40,0.7)]'}
+                ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.6)]' : 'bg-[rgba(10,22,40,0.6)]'}
               `}
             >
               {Math.round(zoom * 100)}%
