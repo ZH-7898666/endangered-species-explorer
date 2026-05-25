@@ -497,6 +497,15 @@ body {
   100% { opacity: 0; transform: translateY(30px) scale(0.95); }
 }
 
+.fullscreen-viewer-enter {
+  animation: viewerFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewerFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 .species-card::-webkit-scrollbar {
   width: 4px;
 }

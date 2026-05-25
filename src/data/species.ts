@@ -205,7 +205,7 @@ export const forestSpecies: Species[] = [
     position: { x: 72, y: 50 },
     lightSize: 36,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_dbfe1c53-8a7d-4ae2-b3fd-b2044f6a8315.jpeg?sign=1810908329-73396d6db0-0-d3d168494be6b6b96c643eae87aa19f774d8b6cc6e397b1cfb0ec1cf68642b2d',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_a3804aee-6ac9-458f-bbc9-f2d4b74ea6f3.jpeg?sign=1811263654-e7529c2bdf-0-0dceabe7d512a59d440372714b530f04f88c5f67b3f4066fbd115fdb608250fe',
   },
   {
     id: 'red-panda',
@@ -541,7 +541,7 @@ export const forestSpecies: Species[] = [
     position: { x: 15, y: 55 },
     lightSize: 36,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8681789f-ad12-4af8-9ff5-11491bcc117a.jpeg?sign=1811262001-313683ff9-0-e6bbbfc7988ea027e02ad944ae990f5952528da2c0d9b88999351bd61b767413',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_cdf381c2-ecea-4df4-ad62-fc8961210b17.jpeg?sign=1811263655-e00ed6ee02-0-05eabf96f44a0ffee7fb963689daaf9dbc35ee8c99ee8fda3c13e8a19b2cc682',
   },
 ];
 
@@ -586,7 +586,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 32, y: 35 },
     lightSize: 42,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_7f0b042f-0d10-4d4b-b333-47450361a1a1.jpeg?sign=1810908351-0e5243071-0-94d752f28eebe12139ac8d04965edfad03679abddb971f5d244ead79eea4d267',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_f5474c95-107b-413d-a2de-6a869eeddffb.jpeg?sign=1811263655-ee9df9bd70-0-b6fb4dc6ee42bb4d9173706f89ef05567fc57feee98248334862838b8d3a1e4e',
   },
   {
     id: 'blue-whale',
@@ -838,7 +838,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 40, y: 68 },
     lightSize: 36,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_3a0b02d6-2341-4fc9-ab63-927b79956994.jpeg?sign=1811254699-cbd34bb454-0-7d11d3041c542b7e4adb2b996d75ee959b182a27e846038eab53379122188164',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_c2513439-e5de-4f8f-b467-c4276a6dc8c4.jpeg?sign=1811263960-ab3793d55a-0-5be7a425605c57f0a9a055da4697a5dd54f105e12a617ba316fea2fdd4414a7a',
   },
   {
     id: 'giant-octopus',
@@ -859,7 +859,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 85, y: 72 },
     lightSize: 34,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_090eef82-678f-4bd7-ae74-fd06efe40516.jpeg?sign=1811254697-c51d4861e7-0-0ee6ce6af39e497ec886e3d8a5ea92de7c86a69ca14d53a385b7347625f4002c',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_735afae1-26cc-4df2-ac86-5025be207670.jpeg?sign=1811264067-d0a07351c1-0-00b461469c935785c46c7fd5593b206daf97de2803e561cf34ff376606d0d387',
   },
   {
     id: 'ocean-sunfish',
@@ -880,7 +880,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 55, y: 55 },
     lightSize: 40,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_e5ff958a-1ea7-4ad0-aea3-af9a7739ba07.jpeg?sign=1811254720-6f537a3b44-0-f5f0dcfc253a9df67730e3662821a285cc3034ea29b1084228a87fdee3483fb5',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8cfbf1bd-dab3-466c-837b-57823c25df40.jpeg?sign=1811264016-46f00da7de-0-e3881fa1aeaa4d97e83df633a80b3353e1761165606e0136305cc4e0bfcaeb8a',
   },
   {
     id: 'coral-reef',
@@ -1006,7 +1006,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 28, y: 60 },
     lightSize: 34,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_43cb19b7-0231-45dd-8a03-0147b006a464.jpeg?sign=1811261970-0aae0ff2f-0-5a9fb7d6de64bb911a5e10a55b28e39607298be7d4fd606c0ffa8f171f2a5c34',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_91a9786a-8edf-43fc-b2c6-00cfac84b7ab.jpeg?sign=1811263655-2224a1ccef-0-f0913b3acd7a9273079d560c3cf33542a492259db0d27925d60f422bafa833d8',
   },
   {
     id: 'asian-arowana',
@@ -1048,7 +1048,7 @@ export const oceanSpecies: Species[] = [
     position: { x: 70, y: 75 },
     lightSize: 26,
     imageUrl:
-      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8ab15231-ac94-4d24-824d-0cad3bc5bd53.jpeg?sign=1811261997-cd2ace2d57-0-6e6ff66ca0c0dc0979d32c9fee9fa6d072abfb7d0abd68a63789d14adfb34d1',
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8b87592e-4f67-48d5-954d-018ef4f5cf88.jpeg?sign=1811263758-f4bd98ddce-0-1d2f9f074b38e5f28b530cc4eef5de00574f108639d714e0e0339fae33a84270',
   },
   {
     id: 'leatherback-turtle',

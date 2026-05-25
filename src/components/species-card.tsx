@@ -10,11 +10,13 @@ interface SpeciesCardProps {
 
 export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'media'>('profile');
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const levelColors: Record<string, { bg: string; text: string; bar: string }> = {
     CR: { bg: 'rgba(220,60,60,0.2)', text: '#ff6b6b', bar: 'linear-gradient(90deg, #ff6b6b, #ee5a24)' },
     EN: { bg: 'rgba(240,160,40,0.2)', text: '#ffa726', bar: 'linear-gradient(90deg, #ffa726, #f57c00)' },
     VU: { bg: 'rgba(240,200,60,0.2)', text: '#ffd54f', bar: 'linear-gradient(90deg, #ffd54f, #fbc02d)' },
+    NT: { bg: 'rgba(120,200,120,0.2)', text: '#81c784', bar: 'linear-gradient(90deg, #81c784, #66bb6a)' },
   };
   const levelColor = levelColors[species.level] || levelColors.VU;
 
@@ -49,14 +51,30 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Hero Image */}
-        <div className="relative w-full h-52 overflow-hidden" style={{ borderRadius: '20px 20px 0 0' }}>
+        {/* Hero Image - clickable */}
+        <div
+          className="relative w-full h-52 overflow-hidden cursor-pointer group"
+          style={{ borderRadius: '20px 20px 0 0' }}
+          onClick={() => setFullscreenImage(species.imageUrl)}
+        >
           <img
             src={species.imageUrl}
             alt={species.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             style={{ filter: 'brightness(0.85) saturate(1.1)' }}
           />
+          {/* Hover expand hint */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'rgba(0,0,0,0.25)' }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+              <span className="text-xs text-white/90 font-medium">查看大图</span>
+            </div>
+          </div>
           {/* Gradient overlay */}
           <div
             className="absolute inset-0"
@@ -66,8 +84,8 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
           />
           {/* Close button */}
           <button
-            onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
             style={{
               background: 'rgba(0,0,0,0.4)',
               backdropFilter: 'blur(8px)',
@@ -207,12 +225,13 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{
-                      width: species.level === 'CR' ? '95%' : species.level === 'EN' ? '70%' : '45%',
+                      width: species.level === 'CR' ? '95%' : species.level === 'EN' ? '70%' : species.level === 'NT' ? '30%' : '45%',
                       background: levelColor.bar,
                     }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
+                  <span className="text-[10px] text-white/25">NT 近危</span>
                   <span className="text-[10px] text-white/25">VU 易危</span>
                   <span className="text-[10px] text-white/25">EN 濒危</span>
                   <span className="text-[10px] text-white/25">CR 极危</span>
@@ -221,14 +240,30 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
             </div>
           ) : (
             <div className="space-y-3">
-              {/* Main Image */}
-              <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+              {/* Main Image - clickable for fullscreen */}
+              <div
+                className="relative rounded-xl overflow-hidden cursor-pointer group"
+                style={{ aspectRatio: '16/9' }}
+                onClick={() => setFullscreenImage(species.imageUrl)}
+              >
                 <img
                   src={species.imageUrl}
                   alt={species.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   style={{ filter: 'brightness(0.9) saturate(1.1)' }}
                 />
+                {/* Hover expand hint */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'rgba(0,0,0,0.25)' }}>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 3 21 3 21 9" />
+                      <polyline points="9 21 3 21 3 15" />
+                      <line x1="21" y1="3" x2="14" y2="10" />
+                      <line x1="3" y1="21" x2="10" y2="14" />
+                    </svg>
+                    <span className="text-xs text-white/90 font-medium">查看大图</span>
+                  </div>
+                </div>
                 <div
                   className="absolute inset-0"
                   style={{
@@ -271,6 +306,67 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
           )}
         </div>
       </div>
+
+      {/* Fullscreen Image Viewer */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center fullscreen-viewer-enter"
+          onClick={() => setFullscreenImage(null)}
+          style={{
+            background: 'rgba(0,0,0,0.92)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-5 right-5 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
+              <path d="M1 1L13 13M13 1L1 13" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          {/* Species name label */}
+          <div className="absolute top-5 left-5 flex items-center gap-3">
+            <span className="text-2xl">{species.emoji}</span>
+            <div>
+              <p className="text-white/90 text-sm font-medium">{species.name}</p>
+              <p className="text-white/40 text-xs italic">{species.latinName}</p>
+            </div>
+          </div>
+
+          {/* Full image - object-contain to show complete animal */}
+          <img
+            src={fullscreenImage}
+            alt={species.name}
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
+            style={{
+              filter: 'brightness(0.95) saturate(1.05)',
+              boxShadow: species.category === 'forest'
+                ? '0 0 80px rgba(232,200,64,0.1)'
+                : '0 0 80px rgba(140,200,240,0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Zoom hint at bottom */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <line x1="11" y1="8" x2="11" y2="14" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+            <span className="text-[11px] text-white/40">点击空白处关闭</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -278,11 +374,11 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
 function InfoItem({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
     <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-      <div className="flex items-center gap-1.5 mb-1">
-        <span className="text-white/30">{icon}</span>
-        <span className="text-[10px] text-white/35 tracking-wider uppercase">{label}</span>
+      <div className="flex items-center gap-1.5 mb-1 text-white/35">
+        {icon}
+        <span className="text-[10px]">{label}</span>
       </div>
-      <p className="text-xs leading-relaxed text-white/60">{value}</p>
+      <p className="text-xs text-white/65 font-medium">{value}</p>
     </div>
   );
 }
