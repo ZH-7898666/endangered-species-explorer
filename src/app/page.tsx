@@ -7,6 +7,8 @@ import OceanScene from '@/components/ocean-scene';
 import { SpeciesCard } from '@/components/species-card';
 import { forestSpecies, oceanSpecies } from '@/data/species';
 import LoadingScreen from '@/components/loading-screen';
+import WelcomeScreen from '@/components/welcome-screen';
+import CompassNav from '@/components/compass-nav';
 
 // World is 2x the viewport size - elements are spread across this larger space
 const WORLD_SCALE = 2.0;
@@ -21,6 +23,8 @@ export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWelcome, setIsWelcome] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
 
   // Viewport camera: zoom and pan within the larger world
   const [zoom, setZoom] = useState(1.0);
@@ -34,6 +38,15 @@ export default function Home() {
 
   const handleLoadingComplete = useCallback(() => {
     setIsLoading(false);
+    setIsWelcome(true);
+  }, []);
+
+  const handleWelcomeComplete = useCallback(() => {
+    setIsEntering(true);
+    setTimeout(() => {
+      setIsWelcome(false);
+      setIsEntering(false);
+    }, 800);
   }, []);
 
   // Mouse position for parallax (normalized -1 to 1)
@@ -153,10 +166,18 @@ export default function Home() {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
+  if (isWelcome) {
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
+
   return (
     <div
       className="relative w-screen h-screen overflow-hidden"
-      style={{ cursor: isPanning.current ? 'grabbing' : 'default' }}
+      style={{
+        cursor: isPanning.current ? 'grabbing' : 'default',
+        opacity: isEntering ? 0 : 1,
+        transition: isEntering ? 'opacity 0.8s ease-out' : 'none',
+      }}
       ref={containerRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMovePan}
@@ -231,20 +252,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Scene switch button */}
+      {/* Compass navigation */}
       <div className="absolute bottom-8 right-8 z-50">
-        <button
-          onClick={() => setCurrentScene(prev => prev === 'forest' ? 'ocean' : 'forest')}
-          className="px-5 py-2.5 rounded-full text-white/80 text-sm tracking-wider transition-all duration-300 hover:scale-105 active:scale-95"
-          style={{
-            background: 'rgba(255,255,255,0.06)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif",
-          }}
-        >
-          {currentScene === 'forest' ? '🌊 深海海域' : '🌿 秘境森林'}
-        </button>
+        <CompassNav
+          currentScene={currentScene}
+          onSwitch={() => setCurrentScene(prev => prev === 'forest' ? 'ocean' : 'forest')}
+        />
       </div>
 
       {/* Zoom indicator */}

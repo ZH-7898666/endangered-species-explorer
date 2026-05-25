@@ -925,6 +925,42 @@ body {
   }
 }
 
+/* ========== Welcome Screen Animations ========== */
+@keyframes orbBreath {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+@keyframes orbParticle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: var(--base-transform, translate(0, 0)) scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: var(--base-transform, translate(0, 0)) scale(1.2);
+  }
+}
+
+@keyframes enterBtnGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(232,200,64,0.05), 0 0 40px rgba(100,200,240,0.03);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(232,200,64,0.15), 0 0 50px rgba(100,200,240,0.08);
+  }
+}
+
+/* ========== Compass Navigation ========== */
+@keyframes compassRingSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .species-card {
