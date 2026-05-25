@@ -729,6 +729,69 @@ body {
   100% { transform: translateX(100vw); }
 }
 
+/* ========== Decorative Bubble Rise (small ambient bubbles) ========== */
+@keyframes decoBubbleRise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.7;
+    transform: translateY(-5vh) translateX(2px) scale(0.8);
+  }
+  25% {
+    transform: translateY(-25vh) translateX(-8px) scale(0.9);
+  }
+  50% {
+    transform: translateY(-50vh) translateX(6px) scale(1);
+  }
+  75% {
+    transform: translateY(-75vh) translateX(-4px) scale(0.95);
+    opacity: 0.5;
+  }
+  95% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-105vh) translateX(0) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* ========== Species Bubble Rise (interactive species bubbles rising from bottom) ========== */
+@keyframes speciesBubbleRise {
+  0% {
+    bottom: -15%;
+    opacity: 0;
+    transform: translateX(0) scale(0.5);
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  20% {
+    transform: translateX(var(--wobble-x1, 10px)) scale(1.02);
+  }
+  40% {
+    transform: translateX(var(--wobble-x2, -8px)) scale(0.98);
+  }
+  60% {
+    transform: translateX(var(--wobble-x3, 6px)) scale(1.01);
+  }
+  80% {
+    transform: translateX(var(--wobble-x4, -4px)) scale(0.99);
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.3;
+  }
+  100% {
+    bottom: 110%;
+    transform: translateX(0) scale(0.9);
+    opacity: 0;
+  }
+}
+
 /* ========== Current Flow ========== */
 @keyframes currentFlow {
   0% { transform: translateX(-100%); }

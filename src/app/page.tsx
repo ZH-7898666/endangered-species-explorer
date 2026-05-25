@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { forestSpecies, oceanSpecies } from '@/data/species';
 import type { Species } from '@/data/species';
 import { ForestScene } from '@/components/forest-scene';
-import { OceanScene } from '@/components/ocean-scene';
+import OceanScene from '@/components/ocean-scene';
 import { SpeciesCard } from '@/components/species-card';
 
 type SceneType = 'forest' | 'ocean';
@@ -207,7 +207,6 @@ export default function Home() {
             unlockedIds={unlockedIds}
             recentlyClicked={recentlyClicked}
             onSpeciesClick={handleSpeciesClick}
-            isVisible={currentScene === 'ocean' && !isTransitioning}
             mousePos={mousePos}
             burstingId={burstingId}
           />
