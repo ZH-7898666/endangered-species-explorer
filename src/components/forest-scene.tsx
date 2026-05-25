@@ -19,7 +19,7 @@ interface LightSpot {
   size: number;
   vx: number;
   vy: number;
-  emoji: string;
+  emoji?: string;
   speciesId: string;
   breathPhase: number;
   parallaxFactor: number;

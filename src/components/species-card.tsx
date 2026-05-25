@@ -294,8 +294,8 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
 
               {/* Status Info */}
               <div className="grid grid-cols-3 gap-2">
-                <StatusCard label="保护等级" value={species.levelName} accent={levelColor.text} />
-                <StatusCard label="CITES" value={species.citesStatus.replace('CITES ', '')} accent="rgba(255,255,255,0.6)" />
+                <StatusCard label="保护等级" value={species.levelName ?? species.level} accent={levelColor.text} />
+                <StatusCard label="CITES" value={(species.citesStatus ?? '').replace('CITES ', '')} accent="rgba(255,255,255,0.6)" />
                 <StatusCard
                   label="类群"
                   value={species.category === 'forest' ? '陆生' : '水生'}
@@ -371,7 +371,7 @@ export function SpeciesCard({ species, onClose }: SpeciesCardProps) {
   );
 }
 
-function InfoItem({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+function InfoItem({ label, value, icon }: { label: string; value?: string; icon: React.ReactNode }) {
   return (
     <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="flex items-center gap-1.5 mb-1 text-white/35">
