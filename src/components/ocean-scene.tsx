@@ -15,23 +15,21 @@ interface OceanSceneProps {
 interface BubbleState {
   id: string;
   species: Species;
-  // Current position (percentage of viewport)
   x: number;
   y: number;
-  // Movement params
-  riseSpeed: number; // px per frame
-  wobbleAmp: number; // horizontal wobble amplitude
-  wobbleSpeed: number; // wobble frequency
-  wobblePhase: number; // starting phase offset
-  size: number; // bubble radius in px
+  riseSpeed: number;
+  wobbleAmp: number;
+  wobbleSpeed: number;
+  wobblePhase: number;
+  size: number;
   parallaxFactor: number;
   color: string;
   emoji: string;
-  // State
   active: boolean;
-  respawnTimer: number | null; // countdown in ms
+  respawnTimer: number | null;
   opacity: number;
   scale: number;
+  breathDuration: number;
 }
 
 const BUBBLE_COLORS: Record<string, { core: string; glow: string }> = {
@@ -52,7 +50,6 @@ function BubbleBurst({ x, y, color }: { x: number; y: number; color: string }) {
 
   return (
     <div className="absolute pointer-events-none" style={{ left: `${x}%`, top: `${y}%`, zIndex: 50 }}>
-      {/* Fragments */}
       {fragments.map((f) => (
         <div
           key={f.id}
@@ -68,7 +65,6 @@ function BubbleBurst({ x, y, color }: { x: number; y: number; color: string }) {
           } as React.CSSProperties}
         />
       ))}
-      {/* Ripple */}
       <div
         className="absolute rounded-full"
         style={{
@@ -99,6 +95,9 @@ export default function OceanScene({
   const bubblesRef = useRef<BubbleState[]>([]);
   const [, forceUpdate] = useState(0);
 
+  // Throttled force update - only update at ~20fps to reduce visual jitter
+  const lastUpdateRef = useRef<number>(0);
+
   // Initialize bubbles
   useEffect(() => {
     const colorKeys = Object.keys(BUBBLE_COLORS);
@@ -108,10 +107,10 @@ export default function OceanScene({
         id: sp.id,
         species: sp,
         x: 8 + (i / species.length) * 80 + (Math.random() - 0.5) * 12,
-        y: 30 + Math.random() * 55, // Start scattered across the screen
-        riseSpeed: 12 + Math.random() * 20, // px per second
-        wobbleAmp: 8 + Math.random() * 18,
-        wobbleSpeed: 0.3 + Math.random() * 0.6,
+        y: 30 + Math.random() * 55,
+        riseSpeed: 8 + Math.random() * 12, // Slower, calmer rise
+        wobbleAmp: 3 + Math.random() * 8, // Reduced wobble
+        wobbleSpeed: 0.15 + Math.random() * 0.25, // Slower wobble
         wobblePhase: Math.random() * Math.PI * 2,
         size,
         parallaxFactor: 0.3 + Math.random() * 0.7,
@@ -121,6 +120,7 @@ export default function OceanScene({
         respawnTimer: null,
         opacity: 1,
         scale: 1,
+        breathDuration: 5 + Math.random() * 4, // Slower breathing, more subtle
       };
     });
     bubblesRef.current = initial;
@@ -134,53 +134,47 @@ export default function OceanScene({
     const animate = (timestamp: number) => {
       if (destroyed) return;
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const dt = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1); // delta in seconds, capped
+      const dt = Math.min((timestamp - lastTimeRef.current) / 1000, 0.1);
       lastTimeRef.current = timestamp;
-
-      let needsUpdate = false;
 
       bubblesRef.current.forEach((b) => {
         if (!b.active && b.respawnTimer !== null) {
-          // Countdown respawn timer
           b.respawnTimer -= dt * 1000;
           if (b.respawnTimer <= 0) {
-            // Respawn from bottom
             b.active = true;
             b.respawnTimer = null;
-            b.y = 102 + Math.random() * 10; // Below viewport
+            b.y = 102 + Math.random() * 10;
             b.x = 8 + Math.random() * 80;
             b.opacity = 0;
-            b.scale = 0.5;
-            needsUpdate = true;
+            b.scale = 0.6;
           }
         }
 
         if (b.active) {
-          // Rise upward
-          b.y -= (b.riseSpeed * dt) / 10; // Convert to %/s roughly
+          // Rise upward slowly
+          b.y -= (b.riseSpeed * dt) / 10;
 
-          // Wobble horizontally
-          b.x += Math.sin(timestamp * 0.001 * b.wobbleSpeed + b.wobblePhase) * b.wobbleAmp * dt * 0.1;
+          // Gentle wobble
+          b.x += Math.sin(timestamp * 0.001 * b.wobbleSpeed + b.wobblePhase) * b.wobbleAmp * dt * 0.05;
 
-          // Fade in if just respawned
+          // Smooth fade in
           if (b.opacity < 1) {
-            b.opacity = Math.min(1, b.opacity + dt * 0.8);
-            b.scale = Math.min(1, b.scale + dt * 0.8);
-            needsUpdate = true;
+            b.opacity = Math.min(1, b.opacity + dt * 0.5);
+            b.scale = Math.min(1, b.scale + dt * 0.5);
           }
 
           // Reset when bubble floats off the top
           if (b.y < -8) {
             b.y = 102 + Math.random() * 10;
             b.x = 8 + Math.random() * 80;
-            b.opacity = 0.8;
+            b.opacity = 0.6;
           }
-
-          needsUpdate = true;
         }
       });
 
-      if (needsUpdate) {
+      // Throttled update at ~20fps for smooth but not jittery motion
+      if (timestamp - lastUpdateRef.current > 50) {
+        lastUpdateRef.current = timestamp;
         forceUpdate((n) => n + 1);
       }
 
@@ -198,19 +192,14 @@ export default function OceanScene({
   const handleBubbleClick = useCallback((b: BubbleState) => {
     if (!b.active) return;
 
-    // Record burst position
     setBurstPositions((prev) => ({ ...prev, [b.id]: { x: b.x, y: b.y } }));
-
-    // Trigger species click
     onSpeciesClick(b.species);
 
-    // Deactivate and start 5s respawn timer
     b.active = false;
     b.respawnTimer = 5000;
     b.opacity = 0;
     b.scale = 0;
 
-    // Clean burst position after animation
     setTimeout(() => {
       setBurstPositions((prev) => {
         const next = { ...prev };
@@ -237,19 +226,19 @@ export default function OceanScene({
     }
   }, [burstingId]);
 
-  // Decorative background bubbles (small, non-interactive, always rising)
+  // Decorative background bubbles
   const decoBubbles = useMemo(() =>
-    Array.from({ length: 30 }, (_, i) => ({
+    Array.from({ length: 25 }, (_, i) => ({
       id: i,
       startX: Math.random() * 100,
       size: 3 + Math.random() * 10,
-      riseDuration: 8 + Math.random() * 15,
-      delay: Math.random() * -20,
-      wobbleAmp: 2 + Math.random() * 8,
-      opacity: 0.03 + Math.random() * 0.08,
+      riseDuration: 10 + Math.random() * 20, // Slower rise
+      delay: Math.random() * -25,
+      wobbleAmp: 2 + Math.random() * 5,
+      opacity: 0.02 + Math.random() * 0.05, // More subtle
     })), []);
 
-  // Pre-generate fish shadows
+  // Fish shadows
   const fishShadows = useMemo(() =>
     Array.from({ length: 6 }, (_, i) => ({
       id: i,
@@ -258,52 +247,52 @@ export default function OceanScene({
       duration: 15 + Math.random() * 20,
       delay: Math.random() * -25,
       direction: Math.random() > 0.5 ? 1 : -1,
-      opacity: 0.04 + Math.random() * 0.08,
+      opacity: 0.04 + Math.random() * 0.06,
     })), []);
 
-  // Pre-generate bioluminescent particles
+  // Bioluminescent particles
   const bioParticles = useMemo(() =>
-    Array.from({ length: 60 }, (_, i) => ({
+    Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: 1 + Math.random() * 3,
-      duration: 4 + Math.random() * 8,
+      size: 1 + Math.random() * 2.5,
+      duration: 5 + Math.random() * 10,
       delay: Math.random() * -10,
-      blinkDuration: 2 + Math.random() * 4,
+      blinkDuration: 3 + Math.random() * 5, // Slower blink
       blinkDelay: Math.random() * -5,
-      driftX: 3 + Math.random() * 10,
-      driftY: 2 + Math.random() * 6,
+      driftX: 3 + Math.random() * 8,
+      driftY: 2 + Math.random() * 5,
       parallaxFactor: 0.1 + Math.random() * 0.3,
-      color: ['rgba(0,220,240,0.7)', 'rgba(100,180,240,0.6)', 'rgba(160,120,240,0.5)', 'rgba(140,220,200,0.5)'][Math.floor(Math.random() * 4)] as string,
+      color: ['rgba(0,220,240,0.5)', 'rgba(100,180,240,0.4)', 'rgba(160,120,240,0.35)', 'rgba(140,220,200,0.35)'][Math.floor(Math.random() * 4)] as string,
     })), []);
 
-  // Pre-generate jellyfish
+  // Jellyfish
   const jellyfish = useMemo(() =>
-    Array.from({ length: 4 }, (_, i) => ({
+    Array.from({ length: 3 }, (_, i) => ({
       id: i,
       x: 10 + Math.random() * 80,
       y: 15 + Math.random() * 50,
       size: 30 + Math.random() * 50,
-      duration: 10 + Math.random() * 15,
+      duration: 12 + Math.random() * 18, // Slower
       delay: Math.random() * -15,
       driftX: 5 + Math.random() * 10,
       parallaxFactor: 0.15 + Math.random() * 0.2,
-      opacity: 0.04 + Math.random() * 0.05,
+      opacity: 0.03 + Math.random() * 0.04,
     })), []);
 
   // Suspended particles in light beams
   const suspendedParticles = useMemo(() =>
-    Array.from({ length: 80 }, (_, i) => ({
+    Array.from({ length: 60 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 70,
-      size: 0.5 + Math.random() * 2,
-      duration: 6 + Math.random() * 12,
+      size: 0.5 + Math.random() * 1.5,
+      duration: 8 + Math.random() * 14,
       delay: Math.random() * -10,
-      driftX: 1 + Math.random() * 4,
-      driftY: 0.5 + Math.random() * 2,
-      opacity: 0.15 + Math.random() * 0.4,
+      driftX: 1 + Math.random() * 3,
+      driftY: 0.5 + Math.random() * 1.5,
+      opacity: 0.1 + Math.random() * 0.25,
     })), []);
 
   // Caustic Canvas Animation
@@ -321,12 +310,12 @@ export default function OceanScene({
     resize();
     window.addEventListener('resize', resize);
 
-    const causticPoints = Array.from({ length: 15 }, (_, i) => ({
+    const causticPoints = Array.from({ length: 12 }, (_, i) => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: 100 + Math.random() * 250,
-      speedX: 0.2 + Math.random() * 0.5,
-      speedY: 0.1 + Math.random() * 0.25,
+      radius: 120 + Math.random() * 280,
+      speedX: 0.15 + Math.random() * 0.35,
+      speedY: 0.08 + Math.random() * 0.2,
       phase: Math.random() * Math.PI * 2,
     }));
 
@@ -339,8 +328,8 @@ export default function OceanScene({
         if (p.x - p.radius > canvas.width) p.x = -p.radius;
 
         const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        gradient.addColorStop(0, `rgba(140, 200, 240, 0.07)`);
-        gradient.addColorStop(0.5, `rgba(100, 180, 220, 0.03)`);
+        gradient.addColorStop(0, `rgba(140, 200, 240, 0.05)`);
+        gradient.addColorStop(0.5, `rgba(100, 180, 220, 0.02)`);
         gradient.addColorStop(1, 'rgba(80, 160, 200, 0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
@@ -359,9 +348,7 @@ export default function OceanScene({
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* ============================================
-          BACKGROUND - Bright luminous ocean with clear light/dark layers
-          ============================================ */}
+      {/* BACKGROUND - Bright luminous ocean */}
       <div
         className="absolute inset-0"
         style={{
@@ -381,9 +368,7 @@ export default function OceanScene({
         }}
       />
 
-      {/* ============================================
-          WATER SURFACE RIPPLES
-          ============================================ */}
+      {/* WATER SURFACE RIPPLES */}
       <div className="absolute top-0 left-0 right-0 h-[12%] pointer-events-none overflow-hidden" style={{ opacity: 0.6 }}>
         <svg className="w-full h-full" viewBox="0 0 1440 120" preserveAspectRatio="none">
           <defs>
@@ -409,9 +394,7 @@ export default function OceanScene({
         </svg>
       </div>
 
-      {/* ============================================
-          TYNDALL LIGHT BEAMS (JESUS LIGHT)
-          ============================================ */}
+      {/* TYNDALL LIGHT BEAMS */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.85 }}>
         <div className="absolute" style={{ top: '-5%', left: '35%', width: '18%', height: '115%', background: 'linear-gradient(180deg, rgba(200,235,255,0.2) 0%, rgba(160,215,245,0.08) 30%, rgba(140,200,240,0.03) 60%, transparent 85%)', transform: 'skewX(3deg)', animation: 'godRaySway 10s ease-in-out infinite', filter: 'blur(2px)' }} />
         <div className="absolute" style={{ top: '-8%', left: '15%', width: '14%', height: '110%', background: 'linear-gradient(180deg, rgba(180,225,250,0.15) 0%, rgba(140,200,240,0.06) 35%, rgba(120,180,220,0.02) 60%, transparent 85%)', transform: 'skewX(-5deg)', animation: 'godRaySway 13s ease-in-out infinite reverse', animationDelay: '-2s', filter: 'blur(3px)' }} />
@@ -420,9 +403,7 @@ export default function OceanScene({
         <div className="absolute" style={{ top: '-6%', left: '5%', width: '10%', height: '105%', background: 'linear-gradient(180deg, rgba(180,225,250,0.1) 0%, rgba(140,200,240,0.03) 45%, transparent 80%)', transform: 'skewX(6deg)', animation: 'godRaySway 16s ease-in-out infinite reverse', animationDelay: '-8s', filter: 'blur(4px)' }} />
       </div>
 
-      {/* ============================================
-          SUSPENDED PARTICLES
-          ============================================ */}
+      {/* SUSPENDED PARTICLES */}
       <div className="absolute inset-0 pointer-events-none z-[2]">
         {suspendedParticles.map((p) => (
           <div key={p.id} className="absolute rounded-full" style={{
@@ -432,14 +413,12 @@ export default function OceanScene({
             boxShadow: `0 0 ${p.size * 2}px rgba(200,230,255,${p.opacity * 0.3})`,
             animation: `suspendedParticleDrift ${p.duration}s ease-in-out ${p.delay}s infinite`,
             transform: `translate(${mousePos.x * p.driftX * 0.3}px, ${mousePos.y * p.driftY * 0.3}px)`,
-            transition: 'transform 1s ease-out',
+            transition: 'transform 1.2s ease-out',
           }} />
         ))}
       </div>
 
-      {/* ============================================
-          SEABED TERRAIN
-          ============================================ */}
+      {/* SEABED TERRAIN */}
       <svg className="absolute bottom-0 left-0 right-0 w-full h-[35%] pointer-events-none z-[3]" viewBox="0 0 1440 350" preserveAspectRatio="none">
         <path d="M0,350 L0,260 Q80,230 160,250 Q280,200 400,230 Q520,180 640,210 Q760,170 880,200 Q1000,160 1120,190 Q1240,170 1360,200 Q1400,190 1440,210 L1440,350 Z" fill="#122845" opacity="0.8" />
         <path d="M0,350 L0,290 Q100,260 200,280 Q340,230 480,260 Q600,220 740,250 Q860,210 980,240 Q1100,210 1220,240 Q1340,220 1440,250 L1440,350 Z" fill="#1B2845" />
@@ -458,9 +437,7 @@ export default function OceanScene({
       {/* Caustic Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-[4]" />
 
-      {/* ============================================
-          BIOLUMINESCENT PARTICLES
-          ============================================ */}
+      {/* BIOLUMINESCENT PARTICLES */}
       <div className="absolute inset-0 pointer-events-none z-[5]">
         {bioParticles.map((p) => (
           <div key={p.id} className="absolute rounded-full" style={{
@@ -470,14 +447,12 @@ export default function OceanScene({
             boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
             animation: `bioParticleFloat ${p.duration}s ease-in-out ${p.delay}s infinite, bioParticleBlink ${p.blinkDuration}s ease-in-out ${p.blinkDelay}s infinite`,
             transform: `translate(${mousePos.x * p.driftX * p.parallaxFactor}px, ${mousePos.y * p.driftY * p.parallaxFactor}px)`,
-            transition: 'transform 0.8s ease-out',
+            transition: 'transform 1s ease-out',
           }} />
         ))}
       </div>
 
-      {/* ============================================
-          JELLYFISH
-          ============================================ */}
+      {/* JELLYFISH */}
       <div className="absolute inset-0 pointer-events-none z-[6]">
         {jellyfish.map((jf) => (
           <div key={jf.id} className="absolute" style={{
@@ -487,7 +462,7 @@ export default function OceanScene({
             borderRadius: '50% 50% 40% 40%',
             animation: `jellyfishFloat ${jf.duration}s ease-in-out ${jf.delay}s infinite`,
             transform: `translate(${mousePos.x * jf.driftX * jf.parallaxFactor}px, 0)`,
-            transition: 'transform 1s ease-out',
+            transition: 'transform 1.2s ease-out',
           }}>
             <div className="absolute bottom-0 left-[15%] right-[15%] h-[60%]" style={{
               background: `linear-gradient(to bottom, rgba(140,120,220,${jf.opacity * 0.5}), transparent)`,
@@ -498,9 +473,7 @@ export default function OceanScene({
         ))}
       </div>
 
-      {/* ============================================
-          FISH SHADOWS
-          ============================================ */}
+      {/* FISH SHADOWS */}
       <div className="absolute inset-0 pointer-events-none z-[7]">
         {fishShadows.map((fish) => (
           <div key={fish.id} className="absolute" style={{
@@ -515,17 +488,13 @@ export default function OceanScene({
         ))}
       </div>
 
-      {/* ============================================
-          WATER CURRENT LIGHT BANDS
-          ============================================ */}
+      {/* WATER CURRENT LIGHT BANDS */}
       <div className="absolute inset-0 pointer-events-none z-[7]" style={{ opacity: 0.5 }}>
         <div className="absolute" style={{ top: '25%', left: '-10%', width: '40%', height: '3%', background: 'linear-gradient(90deg, transparent, rgba(140,180,220,0.08), transparent)', borderRadius: '50%', animation: 'currentFlow 20s linear infinite' }} />
         <div className="absolute" style={{ top: '55%', left: '70%', width: '35%', height: '2%', background: 'linear-gradient(90deg, transparent, rgba(107,91,141,0.06), transparent)', borderRadius: '50%', animation: 'currentFlow 25s linear infinite reverse' }} />
       </div>
 
-      {/* ============================================
-          DECORATIVE BACKGROUND BUBBLES (small, non-interactive, always rising)
-          ============================================ */}
+      {/* DECORATIVE BACKGROUND BUBBLES */}
       <div className="absolute inset-0 pointer-events-none z-[7.5]">
         {decoBubbles.map((db) => (
           <div
@@ -545,21 +514,18 @@ export default function OceanScene({
         ))}
       </div>
 
-      {/* ============================================
-          SPECIES BUBBLES — continuously rising from the bottom
-          ============================================ */}
+      {/* SPECIES BUBBLES — continuously rising from the bottom */}
       <div className="absolute inset-0 z-[8]">
         {bubbles.map((b) => {
           if (!b.active && b.respawnTimer !== null && b.respawnTimer > 0) {
-            // Hidden, waiting to respawn — don't render
             return <div key={b.id} />;
           }
 
           const bubbleColor = BUBBLE_COLORS[b.color] || BUBBLE_COLORS.cyan;
           const isDiscovered = unlockedIds.has(b.species.id) && recentlyClicked.has(b.species.id);
           const isBursting = burstingId === b.species.id;
-          const parallaxX = mousePos.x * b.parallaxFactor * 8;
-          const parallaxY = mousePos.y * b.parallaxFactor * 5;
+          const parallaxX = mousePos.x * b.parallaxFactor * 6;
+          const parallaxY = mousePos.y * b.parallaxFactor * 4;
 
           return (
             <div
@@ -570,7 +536,7 @@ export default function OceanScene({
                 top: `${b.y}%`,
                 transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${b.scale})`,
                 opacity: b.opacity,
-                transition: 'opacity 0.7s ease-out, transform 0.5s ease-out',
+                transition: 'opacity 0.8s ease-out, transform 0.7s ease-out',
                 zIndex: 8 + Math.round(b.size / 15),
               }}
               onClick={() => handleBubbleClick(b)}
@@ -585,7 +551,8 @@ export default function OceanScene({
                 style={{
                   width: `${b.size * 2}px`,
                   height: `${b.size * 2}px`,
-                  animation: `bubbleBreath ${3 + Math.random() * 3}s ease-in-out infinite`,
+                  // Stable breathing - slow and subtle, no size flash
+                  animation: `bubbleBreath ${b.breathDuration}s ease-in-out infinite`,
                 }}
               >
                 {/* Main bubble gradient */}
@@ -601,6 +568,8 @@ export default function OceanScene({
                   className="absolute inset-[15%] rounded-full"
                   style={{
                     background: `radial-gradient(circle, ${bubbleColor.core} 0%, transparent 70%)`,
+                    opacity: isDiscovered ? 0.4 : 1,
+                    transition: 'opacity 0.7s ease-out',
                   }}
                 />
                 {/* Highlight reflection */}
@@ -614,15 +583,20 @@ export default function OceanScene({
                 />
                 {/* Hover ring */}
                 <div className="absolute inset-[-3px] rounded-full border border-[rgba(140,200,240,0)] group-hover:border-[rgba(140,200,240,0.3)] transition-all duration-300" />
+
+                {/* Discovered indicator */}
+                {isDiscovered && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg opacity-60 select-none">{b.emoji}</span>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* ============================================
-          BUBBLE BURST EFFECTS
-          ============================================ */}
+      {/* BUBBLE BURST EFFECTS */}
       {burstingId && burstPositions[burstingId] && (
         <BubbleBurst
           x={burstPositions[burstingId].x}
@@ -631,16 +605,12 @@ export default function OceanScene({
         />
       )}
 
-      {/* ============================================
-          FOREGROUND depth blur at bottom
-          ============================================ */}
+      {/* FOREGROUND depth blur */}
       <div className="absolute bottom-0 left-0 right-0 h-20 z-[11] pointer-events-none" style={{
         background: 'linear-gradient(to top, rgba(8,18,36,0.4) 0%, rgba(8,18,36,0.15) 50%, transparent 100%)',
       }} />
 
-      {/* ============================================
-          VIGNETTE
-          ============================================ */}
+      {/* VIGNETTE */}
       <div className="absolute inset-0 pointer-events-none z-[10]" style={{
         background: 'radial-gradient(ellipse 120% 100% at 50% 30%, transparent 30%, rgba(6,14,30,0.35) 100%)',
       }} />

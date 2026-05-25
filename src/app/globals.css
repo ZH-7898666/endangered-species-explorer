@@ -670,7 +670,7 @@ body {
 /* ========== Bubble Breath ========== */
 @keyframes bubbleBreath {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+  50% { transform: scale(1.04); }
 }
 
 /* ========== Bubble Burst Animation ========== */
