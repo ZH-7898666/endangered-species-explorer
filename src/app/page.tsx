@@ -25,11 +25,13 @@ export default function Home() {
 
   // Mouse position for parallax effect (normalized -1 to 1)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  // Ref for latest mouse position to avoid stale closures
   const mousePosRef = useRef({ x: 0, y: 0 });
 
   // Track recently clicked species for 5s restore effect
   const [recentlyClicked, setRecentlyClicked] = useState<Set<string>>(new Set());
+
+  // Bursting bubble id for pop animation
+  const [burstingId, setBurstingId] = useState<string | null>(null);
 
   const currentSpeciesList = currentScene === 'forest' ? forestSpecies : oceanSpecies;
   const unlockedCount = currentSpeciesList.filter((s) => unlockedIds.has(s.id)).length;
@@ -38,8 +40,8 @@ export default function Home() {
   // Track mouse movement for parallax
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;  // -1 to 1
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
       mousePosRef.current = { x: nx, y: ny };
       setMousePos({ x: nx, y: ny });
     };
@@ -47,18 +49,32 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Handle species click — set recentlyClicked for 5s glow restore
+  // Handle species click
   const handleSpeciesClick = useCallback(
     (species: Species) => {
       if (isCardOpen) return;
       setUnlockedIds((prev) => new Set([...prev, species.id]));
-      setSelectedSpecies(species);
-      setIsCardOpen(true);
-      setIsCardClosing(false);
-      // Mark as recently clicked (dimmed state)
-      setRecentlyClicked((prev) => new Set([...prev, species.id]));
+
+      // If ocean scene, trigger bubble burst animation first
+      if (currentScene === 'ocean') {
+        setBurstingId(species.id);
+        // After burst animation (400ms), show the card
+        setTimeout(() => {
+          setBurstingId(null);
+          setSelectedSpecies(species);
+          setIsCardOpen(true);
+          setIsCardClosing(false);
+          setRecentlyClicked((prev) => new Set([...prev, species.id]));
+        }, 400);
+      } else {
+        // Forest scene — show card immediately with light spot dim
+        setSelectedSpecies(species);
+        setIsCardOpen(true);
+        setIsCardClosing(false);
+        setRecentlyClicked((prev) => new Set([...prev, species.id]));
+      }
     },
-    [isCardOpen]
+    [isCardOpen, currentScene]
   );
 
   const handleCloseCard = useCallback(() => {
@@ -147,21 +163,24 @@ export default function Home() {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Scene Container with Zoom & Pan */}
+      {/* ==========================================
+          SCENE WORLD — zoom & pan only apply here
+          ========================================== */}
       <div
-        className="absolute inset-0 transition-transform duration-200 ease-out"
+        className="absolute inset-0"
         style={{
           transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+          transformOrigin: 'center center',
+          transition: 'transform 0.15s ease-out',
         }}
       >
         {/* Forest Scene */}
         <div
-          className={`absolute inset-0 ${
-            isTransitioning && currentScene === 'ocean' ? 'scene-exit' : ''
-          }`}
+          className="absolute inset-0"
           style={{
             opacity: currentScene === 'forest' ? (isTransitioning ? 0 : 1) : 0,
             transition: isTransitioning ? 'opacity 0.4s ease' : 'opacity 0.8s ease',
+            pointerEvents: currentScene === 'forest' ? 'auto' : 'none',
           }}
         >
           <ForestScene
@@ -176,12 +195,11 @@ export default function Home() {
 
         {/* Ocean Scene */}
         <div
-          className={`absolute inset-0 ${
-            isTransitioning && currentScene === 'forest' ? 'scene-exit' : ''
-          }`}
+          className="absolute inset-0"
           style={{
             opacity: currentScene === 'ocean' ? (isTransitioning ? 0 : 1) : 0,
             transition: isTransitioning ? 'opacity 0.4s ease' : 'opacity 0.8s ease',
+            pointerEvents: currentScene === 'ocean' ? 'auto' : 'none',
           }}
         >
           <OceanScene
@@ -191,11 +209,14 @@ export default function Home() {
             onSpeciesClick={handleSpeciesClick}
             isVisible={currentScene === 'ocean' && !isTransitioning}
             mousePos={mousePos}
+            burstingId={burstingId}
           />
         </div>
       </div>
 
-      {/* UI Overlay */}
+      {/* ==========================================
+          UI OVERLAY — never affected by zoom/pan
+          ========================================== */}
       <div className="fixed inset-0 pointer-events-none z-50">
         {/* Top Center - Unlock Counter */}
         <div className="absolute top-6 left-1/2 -translate-x-1/2">

@@ -673,6 +673,68 @@ body {
   50% { transform: scale(1.12); }
 }
 
+/* ========== Bubble Burst Animation ========== */
+.bubble-burst {
+  animation: bubbleBurst 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes bubbleBurst {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* ========== Fragment Scatter (bubble burst fragments) ========== */
+@keyframes fragmentScatter {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+      calc(cos(var(--frag-angle)) * var(--frag-distance)),
+      calc(sin(var(--frag-angle)) * var(--frag-distance))
+    ) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ========== Ripple Expand (bubble burst ring) ========== */
+@keyframes rippleExpand {
+  0% {
+    width: 10px;
+    height: 10px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+  }
+}
+
+/* ========== Suspended Particle Drift (ocean dust motes) ========== */
+@keyframes suspendedParticleDrift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(3px, -5px); }
+  40% { transform: translate(-2px, -8px); }
+  60% { transform: translate(4px, -3px); }
+  80% { transform: translate(-3px, -6px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ========== Fish Swim ========== */
+@keyframes fishSwim {
+  0% { transform: translateX(-100vw); }
+  100% { transform: translateX(100vw); }
+}
+
+/* ========== Current Flow ========== */
+@keyframes currentFlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200vw); }
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .species-card {
