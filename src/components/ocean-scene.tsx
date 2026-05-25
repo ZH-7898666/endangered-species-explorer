@@ -606,15 +606,16 @@ export default function OceanScene({
         <div className="absolute inset-0 pointer-events-none z-[7.5]">
           {fishSchool.fish.map((f, i) => (
             <div key={`${fishSchool.id}-${i}`} className="absolute" style={{
-              left: `${f.x + (Date.now() - fishSchool.startTime) / 1000 * fishSchool.direction * 8}%`,
+              left: `${f.x}%`,
               top: `${f.y}%`,
-              width: '12px', height: '6px',
-              background: `radial-gradient(ellipse, rgba(180,220,255,0.12), transparent)`,
+              width: '14px', height: '7px',
+              background: `radial-gradient(ellipse, rgba(180,220,255,0.2), transparent)`,
               borderRadius: '60% 40% 40% 60%',
               transform: fishSchool.direction < 0 ? 'scaleX(-1)' : undefined,
               animation: `fishSchoolSwim 10s linear ${f.delay}s forwards`,
-              opacity: 0.15,
-            }} />
+              '--swim-dir': fishSchool.direction,
+              opacity: 0.2,
+            } as React.CSSProperties} />
           ))}
         </div>
       )}

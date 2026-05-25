@@ -979,12 +979,12 @@ body {
 }
 
 @keyframes fishSchoolSwim {
-  0% { transform: translateX(100vw) translateY(0); }
-  20% { transform: translateX(60vw) translateY(-8px); }
-  40% { transform: translateX(20vw) translateY(5px); }
-  60% { transform: translateX(-20vw) translateY(-3px); }
-  80% { transform: translateX(-60vw) translateY(7px); }
-  100% { transform: translateX(-120vw) translateY(0); }
+  0% { transform: translateX(0) translateY(0); }
+  15% { transform: translateX(calc(var(--swim-dir, 1) * 15vw)) translateY(-6px); }
+  35% { transform: translateX(calc(var(--swim-dir, 1) * 35vw)) translateY(4px); }
+  55% { transform: translateX(calc(var(--swim-dir, 1) * 55vw)) translateY(-5px); }
+  75% { transform: translateX(calc(var(--swim-dir, 1) * 75vw)) translateY(3px); }
+  100% { transform: translateX(calc(var(--swim-dir, 1) * 110vw)) translateY(0); }
 }
 
 @keyframes whaleRippleExpand {

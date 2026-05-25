@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Species } from '@/data/species';
-import { ForestScene } from '@/components/forest-scene';
+import ForestScene from '@/components/forest-scene';
 import OceanScene from '@/components/ocean-scene';
 import { SpeciesCard } from '@/components/species-card';
 import { forestSpecies, oceanSpecies } from '@/data/species';

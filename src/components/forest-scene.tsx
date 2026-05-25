@@ -1,34 +1,7 @@
 'use client';
 
-import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import type { Species } from '@/data/species';
-
-interface FloatingSpot {
-  id: string;
-  species: Species;
-  x: number;
-  y: number;
-  size: number;
-  vx: number;
-  vy: number;
-  phase: number;
-  breathPhase: number;
-  parallaxFactor: number;
-  emoji: string;
-  born: number;
-  opacity: number;
-}
-
-interface AnimalSilhouette {
-  id: number;
-  type: 'deer' | 'owl' | 'squirrel';
-  fromX: number;
-  toX: number;
-  y: number;
-  duration: number;
-  startTime: number;
-  direction: number; // 1 or -1
-}
 
 interface ForestSceneProps {
   species: Species[];
@@ -39,7 +12,72 @@ interface ForestSceneProps {
   burstingId: string | null;
 }
 
-export function ForestScene({
+interface LightSpot {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  vx: number;
+  vy: number;
+  emoji: string;
+  speciesId: string;
+  breathPhase: number;
+  parallaxFactor: number;
+  midX: number;
+  midY: number;
+}
+
+interface FireflyData {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+  blinkDuration: number;
+  blinkDelay: number;
+  driftX: number;
+  driftY: number;
+  parallaxFactor: number;
+}
+
+interface MushroomData {
+  id: number;
+  x: number;
+  y: number;
+  capSize: number;
+  stemHeight: number;
+  color: string;
+  glowColor: string;
+  breathDuration: number;
+  breathDelay: number;
+}
+
+interface LeafData {
+  id: number;
+  x: number;
+  startY: number;
+  size: number;
+  duration: number;
+  delay: number;
+  swayAmount: number;
+  rotationSpeed: number;
+  color: string;
+  litColor: string;
+}
+
+interface AnimalSilhouette {
+  id: number;
+  type: 'deer' | 'owl' | 'squirrel';
+  fromX: number;
+  toX: number;
+  y: number;
+  duration: number;
+  direction: 1 | -1;
+  startTime: number;
+}
+
+export default function ForestScene({
   species,
   unlockedIds,
   recentlyClicked,
@@ -49,251 +87,208 @@ export function ForestScene({
 }: ForestSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number>(0);
-  const spotsRef = useRef<FloatingSpot[]>([]);
-  const [renderTick, setRenderTick] = useState(0);
+  const spotsRef = useRef<LightSpot[]>([]);
+  const [mounted, setMounted] = useState(false);
   const [animals, setAnimals] = useState<AnimalSilhouette[]>([]);
-  const [nightCycle, setNightCycle] = useState(0.5); // 0=dark, 1=bright
+  const [dayNightPhase, setDayNightPhase] = useState(0);
 
-  // Initialize floating spots
+  // Day-night cycle: 60s period
   useEffect(() => {
-    const spots: FloatingSpot[] = species.map((sp) => ({
+    const interval = setInterval(() => {
+      setDayNightPhase((Date.now() % 60000) / 60000);
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Day-night brightness: 0.85 ~ 1.0
+  const brightness = 0.85 + Math.sin(dayNightPhase * Math.PI * 2) * 0.075;
+
+  // Parallax offset from mouse
+  const px = (mousePos.x - 0.5) * 30;
+  const py = (mousePos.y - 0.5) * 20;
+
+  // Initialize light spots
+  useEffect(() => {
+    spotsRef.current = species.map((sp, i) => ({
       id: sp.id,
-      species: sp,
-      x: 10 + Math.random() * 80,
-      y: 10 + Math.random() * 70,
-      size: 24 + Math.random() * 28,
-      vx: (Math.random() - 0.5) * 0.04,
-      vy: (Math.random() - 0.5) * 0.03,
-      phase: Math.random() * Math.PI * 2,
-      breathPhase: Math.random() * Math.PI * 2,
-      parallaxFactor: 0.4 + Math.random() * 0.6,
+      x: 8 + ((i * 37 + 13) % 84),
+      y: 10 + ((i * 29 + 7) % 75),
+      size: 22 + (i % 5) * 6,
+      vx: (Math.random() - 0.5) * 0.06,
+      vy: (Math.random() - 0.5) * 0.05,
       emoji: sp.emoji,
-      born: Date.now() - Math.random() * 10000,
-      opacity: 1,
+      speciesId: sp.id,
+      breathPhase: Math.random() * Math.PI * 2,
+      parallaxFactor: 0.3 + Math.random() * 0.4,
+      midX: 50 + (Math.random() - 0.5) * 30,
+      midY: 50 + (Math.random() - 0.5) * 25,
     }));
-    spotsRef.current = spots;
-    setRenderTick((t) => t + 1);
   }, [species]);
 
-  // Animate floating spots - free wandering like fireflies
+  // Animate light spots - random walk
   useEffect(() => {
-    let lastTime = Date.now();
+    setMounted(true);
     const animate = () => {
-      const now = Date.now();
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-
       spotsRef.current.forEach((spot) => {
-        spot.phase += dt * (0.3 + Math.abs(spot.vx) * 5);
-        spot.vx += Math.sin(spot.phase) * 0.008;
-        spot.vy += Math.cos(spot.phase * 0.7) * 0.006;
-        spot.vx *= 0.995;
-        spot.vy *= 0.995;
-
-        const speed = Math.sqrt(spot.vx * spot.vx + spot.vy * spot.vy);
-        const maxSpeed = 0.06;
-        if (speed > maxSpeed) {
-          spot.vx = (spot.vx / speed) * maxSpeed;
-          spot.vy = (spot.vy / speed) * maxSpeed;
-        }
-
-        spot.x += spot.vx * dt * 60;
-        spot.y += spot.vy * dt * 60;
-
-        if (spot.x < 3) { spot.vx += 0.02; spot.x = 3; }
-        if (spot.x > 95) { spot.vx -= 0.02; spot.x = 95; }
-        if (spot.y < 5) { spot.vy += 0.02; spot.y = 5; }
-        if (spot.y > 85) { spot.vy -= 0.02; spot.y = 85; }
-
-        spot.breathPhase += dt * 1.2;
+        spot.vx += (Math.random() - 0.5) * 0.008;
+        spot.vy += (Math.random() - 0.5) * 0.008;
+        spot.vx *= 0.97;
+        spot.vy *= 0.97;
+        const maxV = 0.12;
+        spot.vx = Math.max(-maxV, Math.min(maxV, spot.vx));
+        spot.vy = Math.max(-maxV, Math.min(maxV, spot.vy));
+        spot.x += spot.vx;
+        spot.y += spot.vy;
+        if (spot.x < 5) { spot.x = 5; spot.vx = Math.abs(spot.vx); }
+        if (spot.x > 95) { spot.x = 95; spot.vx = -Math.abs(spot.vx); }
+        if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy); }
+        if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy); }
+        spot.breathPhase += 0.025;
       });
-
-      // Day/night cycle - very slow
-      const cyclePos = (Math.sin(now * 0.0001) + 1) / 2; // 0-1 over ~60s
-      setNightCycle(0.35 + cyclePos * 0.25); // range 0.35-0.6
-
-      setRenderTick((t) => t + 1);
       animFrameRef.current = requestAnimationFrame(animate);
     };
     animFrameRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animFrameRef.current);
   }, []);
 
-  // Occasional animal silhouettes (every 15-30s)
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const spawnAnimal = () => {
-      const types: AnimalSilhouette['type'][] = ['deer', 'owl', 'squirrel'];
-      const type = types[Math.floor(Math.random() * types.length)];
-      const fromLeft = Math.random() > 0.5;
-      const animal: AnimalSilhouette = {
-        id: Date.now(),
-        type,
-        fromX: fromLeft ? -8 : 108,
-        toX: fromLeft ? 108 : -8,
-        y: type === 'owl' ? 15 + Math.random() * 20 : 68 + Math.random() * 15,
-        duration: 8 + Math.random() * 6,
-        startTime: Date.now(),
-        direction: fromLeft ? 1 : -1,
-      };
-      setAnimals((prev) => [...prev, animal]);
-
-      // Remove after animation
-      setTimeout(() => {
-        setAnimals((prev) => prev.filter((a) => a.id !== animal.id));
-      }, animal.duration * 1000 + 500);
-
-      // Schedule next animal (15-30s)
-      timeoutId = setTimeout(spawnAnimal, 15000 + Math.random() * 15000);
-    };
-
-    // First animal after 8-15s
-    timeoutId = setTimeout(spawnAnimal, 8000 + Math.random() * 7000);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // Pre-generate enhanced leaves (30, with light interaction)
-  const leaves = useMemo(() => {
-    return Array.from({ length: 30 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      startY: -5 - Math.random() * 20,
-      duration: 8 + Math.random() * 12,
-      delay: Math.random() * -20,
-      size: 6 + Math.random() * 10,
-      rotation: Math.random() * 360,
-      rotationSpeed: 40 + Math.random() * 80,
-      swayAmount: 30 + Math.random() * 60,
-      color: ['#6B7B3A', '#8B7355', '#9B8B45', '#5A6A2A', '#7B6B4A'][Math.floor(Math.random() * 5)],
-      litColor: '#E8C840',
-    }));
-  }, []);
-
-  // Pre-generate fireflies
-  const fireflies = useMemo(() => {
-    return Array.from({ length: 45 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 1.5 + Math.random() * 3,
-      duration: 3 + Math.random() * 5,
-      delay: Math.random() * -8,
-      blinkDuration: 1.5 + Math.random() * 3,
-      blinkDelay: Math.random() * -4,
-      driftX: 5 + Math.random() * 15,
-      driftY: 3 + Math.random() * 10,
-      parallaxFactor: 0.1 + Math.random() * 0.3,
-    }));
-  }, []);
-
-  // Pre-generate glowing mushrooms
-  const mushrooms = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => ({
-      id: i,
-      x: 5 + Math.random() * 90,
-      y: 82 + Math.random() * 10,
-      capSize: 6 + Math.random() * 8,
-      stemHeight: 4 + Math.random() * 6,
-      color: i % 3 === 0 ? 'rgba(80,200,180,0.5)' : i % 3 === 1 ? 'rgba(100,180,220,0.45)' : 'rgba(140,120,220,0.4)',
-      glowColor: i % 3 === 0 ? 'rgba(80,200,180,0.15)' : i % 3 === 1 ? 'rgba(100,180,220,0.12)' : 'rgba(140,120,220,0.1)',
-      breathDuration: 3 + Math.random() * 3,
-      breathDelay: Math.random() * -5,
-    }));
-  }, []);
-
-  // God ray positions for leaf light detection
-  const godRayPositions = useMemo(() => [
-    { left: 10, width: 18 },
-    { left: 35, width: 22 },
-    { left: 60, width: 16 },
-    { left: 80, width: 14 },
-  ], []);
-
-  // Check if a leaf is near a god ray
-  const isLeafNearRay = useCallback((leafX: number, leafY: number): boolean => {
-    if (leafY < 0 || leafY > 60) return false;
-    return godRayPositions.some(
-      (ray) => leafX > ray.left - 5 && leafX < ray.left + ray.width + 5
-    );
-  }, [godRayPositions]);
-
-  // Fog Canvas Animation
+  // Fog canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    let animId: number;
+    canvas.width = 1440;
+    canvas.height = 900;
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const fogParticles = Array.from({ length: 10 }, (_, i) => ({
+    const fogParticles = Array.from({ length: 10 }, () => ({
       x: Math.random() * canvas.width,
-      y: canvas.height * (0.3 + Math.random() * 0.5),
-      radius: 150 + Math.random() * 300,
-      speed: 0.12 + Math.random() * 0.25,
-      opacity: 0.018 + Math.random() * 0.025,
-      drift: 0.06 + Math.random() * 0.12,
+      y: canvas.height * 0.4 + Math.random() * canvas.height * 0.4,
+      radius: 200 + Math.random() * 300,
+      speed: 0.15 + Math.random() * 0.25,
     }));
 
-    const animate = () => {
+    let frame = 0;
+    const drawFog = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       fogParticles.forEach((p) => {
         p.x += p.speed;
-        p.y += Math.sin(Date.now() * 0.0003 + p.x * 0.001) * p.drift;
         if (p.x - p.radius > canvas.width) p.x = -p.radius;
-
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        gradient.addColorStop(0, `rgba(200, 190, 140, ${p.opacity})`);
-        gradient.addColorStop(0.6, `rgba(200, 190, 140, ${p.opacity * 0.4})`);
-        gradient.addColorStop(1, 'rgba(200, 190, 140, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+        grad.addColorStop(0, 'rgba(200,190,140,0.035)');
+        grad.addColorStop(1, 'rgba(200,190,140,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
       });
-      animId = requestAnimationFrame(animate);
+      frame++;
+      requestAnimationFrame(drawFog);
     };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
+    const fogId = requestAnimationFrame(drawFog);
+    return () => cancelAnimationFrame(fogId);
   }, []);
 
-  const handleClick = useCallback((spot: FloatingSpot) => {
-    onSpeciesClick(spot.species);
-  }, [onSpeciesClick]);
+  // Animal silhouette spawner
+  useEffect(() => {
+    const types: Array<'deer' | 'owl' | 'squirrel'> = ['deer', 'owl', 'squirrel'];
+    const spawnAnimal = () => {
+      const type = types[Math.floor(Math.random() * types.length)];
+      const fromLeft = Math.random() > 0.5;
+      setAnimals((prev) => [
+        ...prev.slice(-2),
+        {
+          id: Date.now() + Math.random(),
+          type,
+          fromX: fromLeft ? -8 : 108,
+          toX: fromLeft ? 108 : -8,
+          y: 50 + Math.random() * 30,
+          duration: 6 + Math.random() * 4,
+          direction: fromLeft ? 1 : -1,
+          startTime: Date.now(),
+        },
+      ]);
+    };
+    const timeout = setTimeout(spawnAnimal, 8000 + Math.random() * 12000);
+    const interval = setInterval(spawnAnimal, 20000 + Math.random() * 15000);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, []);
 
-  // Parallax offset for background layers
-  const px = mousePos.x;
-  const py = mousePos.y;
+  // Fireflies
+  const fireflies = useMemo<FireflyData[]>(() =>
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 85,
+      size: 1.5 + Math.random() * 2.5,
+      duration: 5 + Math.random() * 5,
+      delay: Math.random() * -10,
+      blinkDuration: 3 + Math.random() * 3,
+      blinkDelay: Math.random() * -5,
+      driftX: (Math.random() - 0.5) * 30,
+      driftY: (Math.random() - 0.5) * 20,
+      parallaxFactor: 0.2 + Math.random() * 0.4,
+    })), []);
+
+  // Glowing mushrooms
+  const mushrooms = useMemo<MushroomData[]>(() => {
+    const colors = [
+      { color: 'rgba(80,200,120,0.7)', glow: 'rgba(80,200,120,0.15)' },
+      { color: 'rgba(60,220,180,0.7)', glow: 'rgba(60,220,180,0.12)' },
+      { color: 'rgba(100,180,220,0.6)', glow: 'rgba(100,180,220,0.1)' },
+    ];
+    return Array.from({ length: 7 }, (_, i) => {
+      const c = colors[i % colors.length];
+      return {
+        id: i, x: 6 + i * 13 + Math.random() * 6,
+        y: 88 + Math.random() * 8,
+        capSize: 6 + Math.random() * 5,
+        stemHeight: 4 + Math.random() * 4,
+        color: c.color, glowColor: c.glow,
+        breathDuration: 3 + Math.random() * 3,
+        breathDelay: Math.random() * -5,
+      };
+    });
+  }, []);
+
+  // Falling leaves
+  const leaves = useMemo<LeafData[]>(() =>
+    Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      startY: -5 - Math.random() * 15,
+      size: 5 + Math.random() * 6,
+      duration: 12 + Math.random() * 10,
+      delay: Math.random() * -20,
+      swayAmount: 20 + Math.random() * 30,
+      rotationSpeed: 3 + Math.random() * 5,
+      color: `rgba(${80 + Math.random() * 40},${100 + Math.random() * 40},${40 + Math.random() * 30},0.35)`,
+      litColor: `rgba(232,200,64,0.5)`,
+    })), []);
+
+  const isLeafNearRay = useCallback((leafX: number, threshold: number) => {
+    const rays = [10, 35, 60, 80];
+    return rays.some((rx) => Math.abs(leafX - rx) < threshold);
+  }, []);
+
+  const handleClick = useCallback((spot: LightSpot) => {
+    const sp = species.find((s) => s.id === spot.speciesId);
+    if (sp) onSpeciesClick(sp);
+  }, [species, onSpeciesClick]);
+
+  if (!mounted) return <div className="w-full h-full" />;
 
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ filter: `brightness(${nightCycle})` }}>
-      {/* Background gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 50% at 70% 25%, rgba(232,200,64,0.08) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 40% at 25% 55%, rgba(140,180,80,0.06) 0%, transparent 50%),
-            radial-gradient(ellipse 50% 50% at 50% 80%, rgba(100,140,60,0.06) 0%, transparent 50%),
-            linear-gradient(175deg, #1E3018 0%, #253A1E 15%, #2A4222 35%, #1F3518 55%, #1A2814 100%)
-          `,
-        }}
-      />
+    <div className="relative w-full h-full overflow-hidden" style={{ filter: `brightness(${brightness})` }}>
+      {/* Base gradient - warmer with more light */}
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(165deg, #1F3318 0%, #2A4D20 35%, #1E3A16 65%, #152810 100%)',
+      }} />
 
-      {/* === MULTI-LAYER PARALLAX TREES === */}
-      {/* Layer 1: Far distant mountains - coldest, most transparent */}
-      <div className="absolute inset-0 pointer-events-none" style={{ transform: `translate(${px * 0.5}px, ${py * 0.3}px)`, transition: 'transform 1.2s ease-out' }}>
-        <svg className="absolute bottom-0 left-[-5%] w-[110%] h-[55%]" viewBox="0 0 1500 500" preserveAspectRatio="none">
-          <path d="M0,500 L0,280 Q60,220 120,260 Q180,180 280,220 Q360,140 480,190 Q560,120 680,170 Q760,100 880,150 Q960,90 1080,140 Q1160,80 1280,130 Q1360,70 1500,120 L1500,500 Z"
-            fill="#152210" opacity="0.4" />
+      {/* Layer 1: Distant mountains - cold mist */}
+      <div className="absolute inset-0 pointer-events-none" style={{ transform: `translate(${px * 0.3}px, ${py * 0.15}px)`, transition: 'transform 1.5s ease-out' }}>
+        <svg className="absolute bottom-0 left-[-5%] w-[110%] h-[65%]" viewBox="0 0 1500 600" preserveAspectRatio="none">
+          <path d="M0,600 L0,400 Q60,350 140,380 Q220,300 340,350 Q420,270 540,320 Q620,250 740,300 Q820,230 940,280 Q1020,210 1140,260 Q1220,200 1340,240 Q1400,220 1500,260 L1500,600 Z"
+            fill="#2A3E22" opacity="0.45" />
         </svg>
       </div>
 
@@ -337,12 +332,12 @@ export function ForestScene({
         </svg>
       </div>
 
-      {/* God rays - warm golden light columns */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.8 }}>
-        <div className="absolute" style={{ top: '-20%', left: '10%', width: '18%', height: '130%', background: 'linear-gradient(180deg, rgba(232,200,64,0.1) 0%, rgba(232,200,64,0.04) 35%, transparent 75%)', transform: 'skewX(-10deg)', animation: 'godRaySway 14s ease-in-out infinite' }} />
-        <div className="absolute" style={{ top: '-15%', left: '35%', width: '22%', height: '120%', background: 'linear-gradient(180deg, rgba(232,200,64,0.08) 0%, rgba(200,180,60,0.025) 45%, transparent 80%)', transform: 'skewX(4deg)', animation: 'godRaySway 18s ease-in-out infinite reverse' }} />
-        <div className="absolute" style={{ top: '-10%', left: '60%', width: '16%', height: '110%', background: 'linear-gradient(180deg, rgba(232,200,64,0.07) 0%, rgba(200,180,60,0.02) 50%, transparent 78%)', transform: 'skewX(-6deg)', animation: 'godRaySway 12s ease-in-out infinite', animationDelay: '-4s' }} />
-        <div className="absolute" style={{ top: '-18%', left: '80%', width: '14%', height: '115%', background: 'linear-gradient(180deg, rgba(232,200,64,0.06) 0%, rgba(200,180,60,0.018) 40%, transparent 70%)', transform: 'skewX(8deg)', animation: 'godRaySway 16s ease-in-out infinite reverse', animationDelay: '-7s' }} />
+      {/* God rays - BRIGHTER warm golden light columns */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 1 }}>
+        <div className="absolute" style={{ top: '-20%', left: '10%', width: '18%', height: '130%', background: 'linear-gradient(180deg, rgba(232,200,64,0.18) 0%, rgba(232,200,64,0.08) 35%, transparent 75%)', transform: 'skewX(-10deg)', animation: 'godRaySway 14s ease-in-out infinite' }} />
+        <div className="absolute" style={{ top: '-15%', left: '35%', width: '22%', height: '120%', background: 'linear-gradient(180deg, rgba(232,200,64,0.15) 0%, rgba(200,180,60,0.06) 45%, transparent 80%)', transform: 'skewX(4deg)', animation: 'godRaySway 18s ease-in-out infinite reverse' }} />
+        <div className="absolute" style={{ top: '-10%', left: '60%', width: '16%', height: '110%', background: 'linear-gradient(180deg, rgba(232,200,64,0.12) 0%, rgba(200,180,60,0.05) 50%, transparent 78%)', transform: 'skewX(-6deg)', animation: 'godRaySway 12s ease-in-out infinite', animationDelay: '-4s' }} />
+        <div className="absolute" style={{ top: '-18%', left: '80%', width: '14%', height: '115%', background: 'linear-gradient(180deg, rgba(232,200,64,0.10) 0%, rgba(200,180,60,0.04) 40%, transparent 70%)', transform: 'skewX(8deg)', animation: 'godRaySway 16s ease-in-out infinite reverse', animationDelay: '-7s' }} />
       </div>
 
       {/* Ground gradient with moss */}
@@ -369,7 +364,6 @@ export function ForestScene({
           stroke="#1E2E18" strokeWidth="4" fill="none" opacity="0.5" />
         <path d="M160,65 Q175,55 185,68 Q200,62 210,72"
           stroke="#1E2E18" strokeWidth="3" fill="none" opacity="0.4" />
-        {/* Leaves on branches */}
         <ellipse cx="110" cy="52" rx="12" ry="6" fill="#2A3D20" opacity="0.5" style={{ animation: 'leafSway 4s ease-in-out infinite' }} />
         <ellipse cx="185" cy="64" rx="10" ry="5" fill="#2A3D20" opacity="0.4" style={{ animation: 'leafSway 5s ease-in-out -2s infinite' }} />
         <ellipse cx="250" cy="78" rx="8" ry="4" fill="#2A3D20" opacity="0.35" style={{ animation: 'leafSway 4.5s ease-in-out -1s infinite' }} />
@@ -448,7 +442,7 @@ export function ForestScene({
       <div className="absolute bottom-0 left-0 right-0 h-[30%] pointer-events-none z-[6]"
         style={{ background: 'linear-gradient(to top, rgba(100,140,60,0.07) 0%, rgba(80,120,40,0.035) 50%, transparent 100%)', animation: 'fogDrift 20s ease-in-out infinite' }} />
 
-      {/* Decorative fireflies */}
+      {/* Decorative fireflies - BRIGHTER */}
       <div className="absolute inset-0 pointer-events-none z-[7]">
         {fireflies.map((ff) => (
           <div
@@ -459,8 +453,8 @@ export function ForestScene({
               top: `${ff.y}%`,
               width: `${ff.size}px`,
               height: `${ff.size}px`,
-              background: 'rgba(232,200,64,0.9)',
-              boxShadow: `0 0 ${ff.size * 3}px rgba(232,200,64,0.5), 0 0 ${ff.size * 6}px rgba(232,200,64,0.2)`,
+              background: 'rgba(232,200,64,1)',
+              boxShadow: `0 0 ${ff.size * 4}px rgba(232,200,64,0.8), 0 0 ${ff.size * 8}px rgba(232,200,64,0.4), 0 0 ${ff.size * 12}px rgba(232,200,64,0.15)`,
               animation: `fireflyFloat ${ff.duration}s ease-in-out ${ff.delay}s infinite, fireflyBlink ${ff.blinkDuration}s ease-in-out ${ff.blinkDelay}s infinite`,
               transform: `translate(${px * ff.driftX * ff.parallaxFactor}px, ${py * ff.driftY * ff.parallaxFactor}px)`,
               transition: 'transform 0.8s ease-out',
@@ -469,7 +463,7 @@ export function ForestScene({
         ))}
       </div>
 
-      {/* Floating Light Spots (interactive, freely drifting) */}
+      {/* ====== BRIGHT FLOATING LIGHT SPOTS (interactive, freely drifting) ====== */}
       <div className="absolute inset-0 z-[8]">
         {spotsRef.current.map((spot) => {
           const isUnlocked = unlockedIds.has(spot.id);
@@ -492,35 +486,45 @@ export function ForestScene({
                 height: `${spot.size * 2}px`,
                 transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${isBursting ? 1.3 : isDiscovered ? 0.7 * breathScale : breathScale})`,
                 transition: isBursting ? 'transform 0.15s ease-out' : 'transform 0.6s ease-out, opacity 0.7s ease-out',
-                opacity: isBursting ? 0 : isDiscovered ? 0.35 : 1,
+                opacity: isBursting ? 0 : isDiscovered ? 0.45 : 1,
                 marginLeft: `-${spot.size}px`,
                 marginTop: `-${spot.size}px`,
               }}
               onClick={() => handleClick(spot)}
             >
+              {/* OUTER GLOW - large soft aura */}
+              <div className="absolute inset-[-50%] rounded-full" style={{
+                background: isDiscovered
+                  ? `radial-gradient(circle, rgba(232,200,64,0.1) 0%, rgba(184,212,48,0.03) 50%, transparent 80%)`
+                  : `radial-gradient(circle, rgba(232,200,64,0.35) 0%, rgba(184,212,48,0.12) 50%, transparent 80%)`,
+              }} />
+              {/* MIDDLE GLOW - main visible glow */}
               <div className="absolute inset-0 rounded-full" style={{
                 background: isDiscovered
-                  ? `radial-gradient(circle, rgba(232,200,64,0.15) 0%, rgba(184,212,48,0.04) 50%, transparent 100%)`
-                  : `radial-gradient(circle, rgba(232,200,64,0.5) 0%, rgba(184,212,48,0.2) 50%, transparent 100%)`,
+                  ? `radial-gradient(circle, rgba(232,200,64,0.3) 0%, rgba(184,212,48,0.08) 55%, transparent 100%)`
+                  : `radial-gradient(circle, rgba(232,200,64,0.85) 0%, rgba(184,212,48,0.35) 55%, transparent 100%)`,
                 boxShadow: isDiscovered
-                  ? `0 0 ${spot.size * 0.6}px rgba(232,200,64,0.08)`
-                  : `0 0 ${spot.size * 2}px rgba(232,200,64,0.2), 0 0 ${spot.size * 4}px rgba(184,212,48,0.08)`,
+                  ? `0 0 ${spot.size}px rgba(232,200,64,0.15), 0 0 ${spot.size * 2}px rgba(184,212,48,0.06)`
+                  : `0 0 ${spot.size * 1.5}px rgba(232,200,64,0.5), 0 0 ${spot.size * 3}px rgba(232,200,64,0.25), 0 0 ${spot.size * 5}px rgba(184,212,48,0.1)`,
               }} />
+              {/* CORE - bright center point */}
               <div className="absolute rounded-full" style={{
-                top: '30%', left: '30%', width: '40%', height: '40%',
+                top: '25%', left: '25%', width: '50%', height: '50%',
                 background: isDiscovered
-                  ? 'radial-gradient(circle, rgba(255,240,180,0.2) 0%, rgba(232,200,64,0.06) 100%)'
-                  : 'radial-gradient(circle, rgba(255,240,180,0.85) 0%, rgba(232,200,64,0.35) 100%)',
+                  ? 'radial-gradient(circle, rgba(255,245,200,0.3) 0%, rgba(232,200,64,0.08) 100%)'
+                  : 'radial-gradient(circle, rgba(255,250,220,0.95) 0%, rgba(255,240,180,0.6) 50%, rgba(232,200,64,0.2) 100%)',
                 boxShadow: isDiscovered
-                  ? `0 0 ${spot.size * 0.2}px rgba(255,240,180,0.06)`
-                  : `0 0 ${spot.size * 0.6}px rgba(255,240,180,0.45)`,
+                  ? `0 0 ${spot.size * 0.3}px rgba(255,240,180,0.1)`
+                  : `0 0 ${spot.size * 0.8}px rgba(255,240,180,0.7), 0 0 ${spot.size * 1.5}px rgba(232,200,64,0.3)`,
               }} />
               {isDiscovered && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs opacity-25">{spot.emoji}</span>
+                  <span className="text-xs opacity-35">{spot.emoji}</span>
                 </div>
               )}
-              <div className="absolute inset-[-6px] rounded-full border border-[rgba(232,200,64,0)] group-hover:border-[rgba(232,200,64,0.3)] transition-all duration-300" />
+              {/* Hover ring */}
+              <div className="absolute inset-[-8px] rounded-full border border-[rgba(232,200,64,0)] group-hover:border-[rgba(232,200,64,0.4)] transition-all duration-300"
+                style={{ boxShadow: 'group-hover: 0 0 10px rgba(232,200,64,0.2)' }} />
             </div>
           );
         })}
@@ -532,10 +536,10 @@ export function ForestScene({
         if (!spot) return null;
         const parallaxX = px * spot.size * 0.3 * spot.parallaxFactor;
         const parallaxY = py * spot.size * 0.25 * spot.parallaxFactor;
-        const fragments = Array.from({ length: 10 }, (_, i) => {
-          const angle = (i / 10) * Math.PI * 2 + Math.random() * 0.3;
-          const distance = 30 + Math.random() * 50;
-          return { angle, distance, size: 2 + Math.random() * 4, delay: Math.random() * 0.1 };
+        const fragments = Array.from({ length: 12 }, (_, i) => {
+          const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
+          const distance = 40 + Math.random() * 60;
+          return { angle, distance, size: 2 + Math.random() * 5, delay: Math.random() * 0.1 };
         });
         return (
           <div className="absolute inset-0 z-[9] pointer-events-none">
@@ -544,8 +548,8 @@ export function ForestScene({
                 left: `${spot.x}%`, top: `${spot.y}%`,
                 width: `${frag.size}px`, height: `${frag.size}px`,
                 marginLeft: `-${frag.size / 2}px`, marginTop: `-${frag.size / 2}px`,
-                background: 'rgba(255,240,180,0.8)',
-                boxShadow: `0 0 ${frag.size * 2}px rgba(232,200,64,0.5)`,
+                background: 'rgba(255,240,180,0.9)',
+                boxShadow: `0 0 ${frag.size * 3}px rgba(232,200,64,0.6), 0 0 ${frag.size * 6}px rgba(232,200,64,0.2)`,
                 transform: `translate(${parallaxX}px, ${parallaxY}px)`,
                 animation: `lightBurst ${0.5 + frag.delay}s ease-out forwards`,
                 '--burst-x': `${Math.cos(frag.angle) * frag.distance}px`,
@@ -556,7 +560,7 @@ export function ForestScene({
               left: `${spot.x}%`, top: `${spot.y}%`,
               width: `${spot.size * 2}px`, height: `${spot.size * 2}px`,
               marginLeft: `-${spot.size}px`, marginTop: `-${spot.size}px`,
-              border: '2px solid rgba(232,200,64,0.4)',
+              border: '2px solid rgba(232,200,64,0.5)',
               transform: `translate(${parallaxX}px, ${parallaxY}px)`,
               animation: 'glowRingExpand 0.6s ease-out forwards',
             }} />
@@ -567,7 +571,6 @@ export function ForestScene({
       {/* === ENHANCED FALLING LEAVES with light interaction === */}
       <div className="absolute inset-0 pointer-events-none z-[10]">
         {leaves.map((leaf) => {
-          // Check if leaf path crosses a god ray
           const nearRay = isLeafNearRay(leaf.x, 40);
           return (
             <div
@@ -581,7 +584,7 @@ export function ForestScene({
                 background: nearRay ? leaf.litColor : leaf.color,
                 borderRadius: '50% 0 50% 0',
                 opacity: nearRay ? 0.6 : 0.3,
-                boxShadow: nearRay ? `0 0 ${leaf.size}px rgba(232,200,64,0.3)` : 'none',
+                boxShadow: nearRay ? `0 0 ${leaf.size}px rgba(232,200,64,0.4)` : 'none',
                 animation: `leafFall ${leaf.duration}s linear ${leaf.delay}s infinite`,
                 transition: 'background 0.5s, opacity 0.5s, box-shadow 0.5s',
               }}
@@ -598,9 +601,11 @@ export function ForestScene({
       {/* === ANIMAL SILHOUETTES === */}
       <div className="absolute inset-0 pointer-events-none z-[10]">
         {animals.map((animal) => {
-          const progress = Math.min(1, (Date.now() - animal.startTime) / (animal.duration * 1000));
+          const elapsed = (Date.now() - animal.startTime) / 1000;
+          if (elapsed > animal.duration) return null;
+          const progress = elapsed / animal.duration;
           const currentX = animal.fromX + (animal.toX - animal.fromX) * progress;
-          const fadeOpacity = progress < 0.1 ? progress / 0.1 : progress > 0.9 ? (1 - progress) / 0.1 : 0.25;
+          const fadeOpacity = progress < 0.1 ? progress / 0.1 : progress > 0.9 ? (1 - progress) / 0.1 : 0.3;
 
           return (
             <div
@@ -616,54 +621,38 @@ export function ForestScene({
             >
               {animal.type === 'deer' && (
                 <svg width="80" height="60" viewBox="0 0 80 60" fill="#1A2814" opacity="0.8">
-                  {/* Deer body */}
                   <ellipse cx="40" cy="38" rx="22" ry="12" />
-                  {/* Neck */}
                   <ellipse cx="58" cy="26" rx="6" ry="14" transform="rotate(-15 58 26)" />
-                  {/* Head */}
                   <ellipse cx="62" cy="16" rx="7" ry="5" />
-                  {/* Antlers */}
                   <path d="M62,11 L58,2 L55,5 M58,2 L60,-1 M62,11 L66,3 L69,5 M66,3 L64,0" stroke="#1A2814" strokeWidth="1.5" fill="none" />
-                  {/* Legs */}
                   <line x1="28" y1="48" x2="26" y2="58" stroke="#1A2814" strokeWidth="2.5" />
                   <line x1="35" y1="48" x2="33" y2="58" stroke="#1A2814" strokeWidth="2.5" />
                   <line x1="48" y1="48" x2="50" y2="58" stroke="#1A2814" strokeWidth="2.5" />
                   <line x1="54" y1="48" x2="56" y2="58" stroke="#1A2814" strokeWidth="2.5" />
-                  {/* Tail */}
                   <ellipse cx="18" cy="34" rx="4" ry="3" />
                 </svg>
               )}
               {animal.type === 'owl' && (
                 <svg width="50" height="55" viewBox="0 0 50 55" fill="#1A2814" opacity="0.7">
-                  {/* Body */}
                   <ellipse cx="25" cy="35" rx="14" ry="18" />
-                  {/* Head */}
                   <circle cx="25" cy="16" r="11" />
-                  {/* Ear tufts */}
                   <polygon points="17,8 14,0 20,6" />
                   <polygon points="33,8 36,0 30,6" />
-                  {/* Eyes (glowing) */}
-                  <circle cx="21" cy="15" r="3.5" fill="#1A2814" stroke="rgba(232,200,64,0.3)" strokeWidth="1" />
-                  <circle cx="29" cy="15" r="3.5" fill="#1A2814" stroke="rgba(232,200,64,0.3)" strokeWidth="1" />
-                  <circle cx="21" cy="15" r="1.5" fill="rgba(232,200,64,0.25)" />
-                  <circle cx="29" cy="15" r="1.5" fill="rgba(232,200,64,0.25)" />
-                  {/* Wings */}
+                  <circle cx="21" cy="15" r="3.5" fill="#1A2814" stroke="rgba(232,200,64,0.4)" strokeWidth="1" />
+                  <circle cx="29" cy="15" r="3.5" fill="#1A2814" stroke="rgba(232,200,64,0.4)" strokeWidth="1" />
+                  <circle cx="21" cy="15" r="1.5" fill="rgba(232,200,64,0.35)" />
+                  <circle cx="29" cy="15" r="1.5" fill="rgba(232,200,64,0.35)" />
                   <ellipse cx="12" cy="34" rx="6" ry="14" transform="rotate(10 12 34)" />
                   <ellipse cx="38" cy="34" rx="6" ry="14" transform="rotate(-10 38 34)" />
                 </svg>
               )}
               {animal.type === 'squirrel' && (
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="#1A2814" opacity="0.7">
-                  {/* Body */}
                   <ellipse cx="18" cy="25" rx="8" ry="10" />
-                  {/* Head */}
                   <circle cx="26" cy="16" r="6" />
-                  {/* Ears */}
                   <circle cx="23" cy="10" r="2" />
                   <circle cx="29" cy="10" r="2" />
-                  {/* Tail (curled up) */}
                   <path d="M10,25 Q4,18 8,10 Q12,4 16,8" stroke="#1A2814" strokeWidth="4" fill="none" strokeLinecap="round" />
-                  {/* Legs */}
                   <line x1="14" y1="34" x2="12" y2="39" stroke="#1A2814" strokeWidth="2" />
                   <line x1="22" y1="34" x2="24" y2="39" stroke="#1A2814" strokeWidth="2" />
                 </svg>
@@ -675,7 +664,7 @@ export function ForestScene({
 
       {/* Top vignette */}
       <div className="absolute inset-0 pointer-events-none z-[11]"
-        style={{ background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(20,30,15,0.35) 100%)' }} />
+        style={{ background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 45%, rgba(20,30,15,0.3) 100%)' }} />
     </div>
   );
 }
