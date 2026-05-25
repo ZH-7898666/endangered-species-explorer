@@ -1,107 +1,97 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import type { Species } from '@/data/species';
 
 interface ForestSceneProps {
   species: Species[];
   unlockedIds: Set<string>;
+  recentlyClicked: Set<string>;
   onSpeciesClick: (species: Species) => void;
   isVisible: boolean;
+  mousePos: { x: number; y: number };
 }
 
-export function ForestScene({ species, unlockedIds, onSpeciesClick, isVisible }: ForestSceneProps) {
+export function ForestScene({
+  species,
+  unlockedIds,
+  recentlyClicked,
+  onSpeciesClick,
+  isVisible,
+  mousePos,
+}: ForestSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Light spot movement params
-  const spotParams = useMemo(
-    () =>
-      species.map(() => ({
-        floatDuration: 4 + Math.random() * 6,
-        dx1: -8 + Math.random() * 16,
-        dy1: -10 + Math.random() * 8,
-        dx2: -8 + Math.random() * 16,
-        dy2: -10 + Math.random() * 8,
-        dx3: -8 + Math.random() * 16,
-        dy3: -10 + Math.random() * 8,
-        dx4: -8 + Math.random() * 16,
-        dy4: -10 + Math.random() * 8,
-        breathDuration: 3 + Math.random() * 4,
-        breathDelay: Math.random() * 3,
-      })),
-    [species]
-  );
+  // Pre-generate light spot positions and animation params
+  const lightSpots = useMemo(() => {
+    return species.map((sp, i) => {
+      const cols = 4;
+      const rows = Math.ceil(species.length / cols);
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const cellW = 100 / cols;
+      const cellH = 80 / rows;
+      const baseX = cellW * col + cellW * 0.2 + Math.random() * cellW * 0.6;
+      const baseY = 10 + cellH * row + cellH * 0.15 + Math.random() * cellH * 0.5;
+      return {
+        species: sp,
+        baseX,
+        baseY,
+        lightSize: 18 + Math.random() * 22,
+        floatDuration: 4 + Math.random() * 5,
+        floatDelay: Math.random() * -10,
+        breathDuration: 3 + Math.random() * 3,
+        breathDelay: Math.random() * -6,
+        driftX: 6 + Math.random() * 12,
+        driftY: 4 + Math.random() * 10,
+        driftDuration: 7 + Math.random() * 6,
+        driftDelay: Math.random() * -8,
+        parallaxFactor: 0.3 + Math.random() * 0.7, // how much it follows mouse
+        emoji: sp.emoji,
+      };
+    });
+  }, [species]);
 
-  // Falling leaves
-  const leaves = useMemo(
-    () =>
-      Array.from({ length: 18 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        delay: Math.random() * 8,
-        duration: 8 + Math.random() * 10,
-        size: 8 + Math.random() * 12,
-        sway: 20 + Math.random() * 30,
-        hue: Math.random() > 0.5 ? '#C8A040' : '#8B7355',
-      })),
-    []
-  );
+  // Pre-generate leaves
+  const leaves = useMemo(() => {
+    return Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      startY: -5 - Math.random() * 20,
+      duration: 8 + Math.random() * 12,
+      delay: Math.random() * -20,
+      size: 6 + Math.random() * 10,
+      rotation: Math.random() * 360,
+      rotationSpeed: 40 + Math.random() * 80,
+      swayAmount: 30 + Math.random() * 60,
+      color: ['#6B7B3A', '#8B7355', '#9B8B45', '#5A6A2A', '#7B6B4A'][Math.floor(Math.random() * 5)],
+    }));
+  }, []);
 
-  // Fireflies
-  const fireflies = useMemo(
-    () =>
-      Array.from({ length: 35 }, (_, i) => ({
-        id: i,
-        left: 5 + Math.random() * 90,
-        top: 10 + Math.random() * 75,
-        size: 2 + Math.random() * 3,
-        duration: 3 + Math.random() * 5,
-        delay: Math.random() * 6,
-        dx: -15 + Math.random() * 30,
-        dy: -10 + Math.random() * 20,
-      })),
-    []
-  );
+  // Pre-generate fireflies
+  const fireflies = useMemo(() => {
+    return Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 1.5 + Math.random() * 3,
+      duration: 3 + Math.random() * 5,
+      delay: Math.random() * -8,
+      blinkDuration: 1.5 + Math.random() * 3,
+      blinkDelay: Math.random() * -4,
+      driftX: 5 + Math.random() * 15,
+      driftY: 3 + Math.random() * 10,
+      parallaxFactor: 0.1 + Math.random() * 0.3,
+    }));
+  }, []);
 
-  // Light rays (god rays through canopy)
-  const lightRays = useMemo(
-    () =>
-      Array.from({ length: 5 }, (_, i) => ({
-        id: i,
-        left: 10 + i * 18 + Math.random() * 10,
-        width: 40 + Math.random() * 80,
-        opacity: 0.04 + Math.random() * 0.06,
-        duration: 6 + Math.random() * 8,
-        delay: Math.random() * 5,
-      })),
-    []
-  );
-
-  // Fog particles
-  const fogParticles = useMemo(
-    () =>
-      Array.from({ length: 6 }, (_, i) => ({
-        id: i,
-        top: 30 + Math.random() * 50,
-        width: 200 + Math.random() * 400,
-        height: 40 + Math.random() * 80,
-        duration: 20 + Math.random() * 25,
-        delay: Math.random() * 15,
-        opacity: 0.03 + Math.random() * 0.04,
-      })),
-    []
-  );
-
-  // Canvas for fog/mist effect
+  // Fog Canvas Animation
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !isVisible) return;
-
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    let animFrame: number;
-    let time = 0;
+    let animId: number;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -110,282 +100,255 @@ export function ForestScene({ species, unlockedIds, onSpeciesClick, isVisible }:
     resize();
     window.addEventListener('resize', resize);
 
+    const fogParticles = Array.from({ length: 8 }, (_, i) => ({
+      x: Math.random() * canvas.width,
+      y: canvas.height * (0.4 + Math.random() * 0.5),
+      radius: 120 + Math.random() * 250,
+      speed: 0.15 + Math.random() * 0.3,
+      opacity: 0.015 + Math.random() * 0.025,
+      drift: 0.08 + Math.random() * 0.15,
+    }));
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      time += 0.002;
+      fogParticles.forEach((p) => {
+        p.x += p.speed;
+        p.y += Math.sin(Date.now() * 0.0003 + p.x * 0.001) * p.drift;
+        if (p.x - p.radius > canvas.width) p.x = -p.radius;
 
-      // Warm golden fog layers — more visible
-      for (let i = 0; i < 8; i++) {
-        const x = Math.sin(time * 0.5 + i * 1.2) * canvas.width * 0.3 + canvas.width * 0.5;
-        const y = canvas.height * (0.25 + i * 0.08) + Math.cos(time + i) * 30;
-        const size = 250 + Math.sin(time + i * 0.8) * 80;
-
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(210, 195, 140, 0.05)`);
-        gradient.addColorStop(0.5, `rgba(190, 175, 120, 0.025)`);
-        gradient.addColorStop(1, `rgba(170, 155, 100, 0)`);
-        ctx.beginPath();
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+        gradient.addColorStop(0, `rgba(200, 190, 140, ${p.opacity})`);
+        gradient.addColorStop(0.6, `rgba(200, 190, 140, ${p.opacity * 0.4})`);
+        gradient.addColorStop(1, 'rgba(200, 190, 140, 0)');
         ctx.fillStyle = gradient;
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Green mist near ground — more visible
-      for (let i = 0; i < 5; i++) {
-        const x = Math.cos(time * 0.3 + i * 2) * canvas.width * 0.4 + canvas.width * 0.5;
-        const y = canvas.height * 0.82 + Math.sin(time * 0.5 + i) * 20;
-        const size = 350 + Math.sin(time + i) * 60;
-
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-        gradient.addColorStop(0, `rgba(160, 190, 110, 0.04)`);
-        gradient.addColorStop(1, `rgba(120, 160, 90, 0)`);
-        ctx.beginPath();
-        ctx.fillStyle = gradient;
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animFrame = requestAnimationFrame(animate);
+        ctx.fillRect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
+      });
+      animId = requestAnimationFrame(animate);
     };
-
     animate();
 
     return () => {
-      cancelAnimationFrame(animFrame);
+      cancelAnimationFrame(animId);
       window.removeEventListener('resize', resize);
     };
-  }, [isVisible]);
+  }, []);
 
   return (
-    <div className="absolute inset-0 forest-bg">
-      {/* Canvas for fog */}
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
-
-      {/* God rays through canopy */}
-      {lightRays.map((ray) => (
-        <div
-          key={ray.id}
-          className="absolute top-0 pointer-events-none z-[2]"
-          style={{
-            left: `${ray.left}%`,
-            width: `${ray.width}px`,
-            height: '100%',
-            background: `linear-gradient(
-              180deg,
-              rgba(232,200,64,${ray.opacity * 1.5}) 0%,
-              rgba(200,180,80,${ray.opacity * 0.8}) 30%,
-              rgba(180,160,60,${ray.opacity * 0.3}) 60%,
-              transparent 100%
-            )`,
-            filter: 'blur(20px)',
-            animation: `godRayPulse ${ray.duration}s ease-in-out ${ray.delay}s infinite alternate`,
-            transform: 'skewX(-5deg)',
-          }}
-        />
-      ))}
-
-      {/* Far mountains - warm twilight silhouette */}
-      <svg className="mountain-layer z-[1]" style={{ height: '45%' }} viewBox="0 0 1440 400" preserveAspectRatio="none">
-        <path
-          d="M0,400 L0,280 Q60,240 120,260 Q200,220 300,250 Q380,200 480,230 Q560,180 680,210 Q780,170 880,200 Q960,160 1060,190 Q1160,150 1260,180 Q1340,170 1440,200 L1440,400 Z"
-          fill="rgba(35,50,30,0.7)"
-        />
-      </svg>
-
-      {/* Mid mountains with warm tones */}
-      <svg className="mountain-layer z-[2]" style={{ height: '55%' }} viewBox="0 0 1440 400" preserveAspectRatio="none">
-        <path
-          d="M0,400 L0,320 Q80,280 160,300 Q280,240 400,270 Q520,220 640,260 Q760,230 880,250 Q1000,210 1120,240 Q1240,220 1360,250 L1440,260 L1440,400 Z"
-          fill="rgba(50,65,40,0.8)"
-        />
-      </svg>
-
-      {/* Near foliage with warm brown-green tones */}
-      <svg className="mountain-layer z-[3]" style={{ height: '65%' }} viewBox="0 0 1440 400" preserveAspectRatio="none">
-        <path
-          d="M0,400 L0,340 Q40,320 80,330 Q140,300 200,320 Q280,290 360,310 Q440,280 520,300 Q600,270 680,295 Q760,265 840,285 Q920,260 1000,280 Q1080,255 1160,275 Q1240,260 1320,280 Q1380,270 1440,290 L1440,400 Z"
-          fill="rgba(62,74,53,0.9)"
-        />
-      </svg>
-
-      {/* Ground with warm earth tone */}
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Background gradient - warmer, more alive */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none"
+        className="absolute inset-0"
         style={{
-          height: '25%',
-          background: 'linear-gradient(to top, rgba(80,65,40,0.95) 0%, rgba(62,74,53,0.6) 50%, transparent 100%)',
+          background: `
+            radial-gradient(ellipse 80% 50% at 70% 30%, rgba(232,200,64,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 30% 60%, rgba(140,180,80,0.05) 0%, transparent 50%),
+            radial-gradient(ellipse 100% 100% at 50% 100%, rgba(139,115,85,0.1) 0%, transparent 50%),
+            linear-gradient(175deg, #1E3018 0%, #253A1E 20%, #2A4222 40%, #1E3018 70%, #1A2814 100%)
+          `,
         }}
       />
 
-      {/* Tree silhouettes on sides */}
-      <svg className="absolute bottom-0 left-0 w-1/3 h-[70%] z-[4] pointer-events-none" viewBox="0 0 500 700" preserveAspectRatio="xMidYMax slice">
-        {/* Left side trees */}
-        <path d="M80,700 L80,200 Q60,180 70,160 Q50,150 65,130 Q45,120 60,100 L80,80 L100,100 Q115,120 95,130 Q110,150 90,160 Q100,180 80,200 Z" fill="rgba(25,35,20,0.8)" />
-        <path d="M150,700 L150,280 Q130,260 140,240 Q120,230 135,210 L150,190 L165,210 Q180,230 160,240 Q170,260 150,280 Z" fill="rgba(30,42,25,0.7)" />
-        <path d="M30,700 L30,320 Q15,300 25,280 Q10,270 20,250 L30,230 L40,250 Q50,270 35,280 Q45,300 30,320 Z" fill="rgba(20,30,18,0.6)" />
-        {/* Branches */}
-        <path d="M80,250 Q50,240 30,250" stroke="rgba(25,35,20,0.5)" strokeWidth="3" fill="none" />
-        <path d="M80,300 Q110,285 140,295" stroke="rgba(25,35,20,0.4)" strokeWidth="2" fill="none" />
-      </svg>
-      <svg className="absolute bottom-0 right-0 w-1/3 h-[70%] z-[4] pointer-events-none" viewBox="0 0 500 700" preserveAspectRatio="xMidYMax slice">
-        {/* Right side trees */}
-        <path d="M420,700 L420,220 Q400,200 410,180 Q390,170 405,150 L420,130 L435,150 Q450,170 430,180 Q440,200 420,220 Z" fill="rgba(25,35,20,0.8)" />
-        <path d="M350,700 L350,300 Q335,280 345,260 Q330,250 340,230 L350,215 L360,230 Q370,250 355,260 Q365,280 350,300 Z" fill="rgba(30,42,25,0.7)" />
-        <path d="M470,700 L470,350 Q460,335 465,320 Q455,310 462,295 L470,280 L478,295 Q485,310 475,320 Q480,335 470,350 Z" fill="rgba(20,30,18,0.6)" />
+      {/* God rays - warm golden light from above */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.7 }}>
+        <div
+          className="absolute"
+          style={{
+            top: '-20%', left: '15%', width: '25%', height: '120%',
+            background: 'linear-gradient(180deg, rgba(232,200,64,0.08) 0%, rgba(232,200,64,0.03) 40%, transparent 80%)',
+            transform: 'skewX(-8deg)',
+            animation: 'godRaySway 12s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute"
+          style={{
+            top: '-15%', left: '55%', width: '20%', height: '110%',
+            background: 'linear-gradient(180deg, rgba(232,200,64,0.06) 0%, rgba(200,180,60,0.02) 50%, transparent 80%)',
+            transform: 'skewX(5deg)',
+            animation: 'godRaySway 15s ease-in-out infinite reverse',
+          }}
+        />
+        <div
+          className="absolute"
+          style={{
+            top: '-10%', left: '75%', width: '15%', height: '100%',
+            background: 'linear-gradient(180deg, rgba(232,200,64,0.05) 0%, rgba(200,180,60,0.015) 50%, transparent 75%)',
+            transform: 'skewX(-3deg)',
+            animation: 'godRaySway 10s ease-in-out infinite',
+            animationDelay: '-3s',
+          }}
+        />
+      </div>
+
+      {/* Far mountain silhouettes */}
+      <svg className="absolute bottom-0 left-0 right-0 w-full h-[60%] pointer-events-none" viewBox="0 0 1440 600" preserveAspectRatio="none">
+        <path d="M0,600 L0,320 Q80,260 160,300 Q240,200 360,250 Q440,180 560,230 Q640,160 760,210 Q840,150 960,200 Q1040,140 1160,190 Q1240,130 1360,180 Q1400,160 1440,200 L1440,600 Z"
+          fill="#1E2E18" opacity="0.7" />
+        <path d="M0,600 L0,380 Q100,300 200,350 Q320,250 440,310 Q540,220 680,280 Q780,200 900,260 Q1000,190 1120,240 Q1220,180 1340,230 Q1400,210 1440,250 L1440,600 Z"
+          fill="#23321E" opacity="0.85" />
+        <path d="M0,600 L0,430 Q120,370 240,400 Q360,320 480,370 Q580,290 720,350 Q840,280 960,330 Q1060,270 1180,320 Q1280,260 1400,310 L1440,300 L1440,600 Z"
+          fill="#2A3D20" />
+        <path d="M0,600 L0,480 Q80,440 200,460 Q320,410 440,450 Q560,390 680,430 Q800,380 920,420 Q1040,370 1160,410 Q1280,360 1400,400 L1440,390 L1440,600 Z"
+          fill="#304826" />
       </svg>
 
-      {/* Warm ambient glow from top — more golden */}
+      {/* Ground gradient */}
       <div
-        className="absolute top-0 left-0 right-0 z-[5] pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 h-[25%] pointer-events-none"
         style={{
-          height: '45%',
-          background: 'linear-gradient(to bottom, rgba(220,190,80,0.08) 0%, rgba(200,170,60,0.04) 40%, rgba(180,150,40,0.01) 70%, transparent 100%)',
+          background: 'linear-gradient(to top, #3E4E35 0%, #354A2D 30%, rgba(58,78,45,0.6) 60%, transparent 100%)',
         }}
       />
 
-      {/* Fog particles drifting */}
-      {fogParticles.map((fog) => (
-        <div
-          key={fog.id}
-          className="absolute pointer-events-none z-[6]"
-          style={{
-            top: `${fog.top}%`,
-            left: '-20%',
-            width: `${fog.width}px`,
-            height: `${fog.height}px`,
-            background: `radial-gradient(ellipse, rgba(200,190,150,${fog.opacity}) 0%, transparent 70%)`,
-            filter: 'blur(30px)',
-            animation: `fogDrift ${fog.duration}s linear ${fog.delay}s infinite`,
-          }}
-        />
-      ))}
+      {/* Side tree silhouettes */}
+      <div className="absolute bottom-0 left-0 w-[18%] h-[70%] pointer-events-none" style={{
+        background: 'linear-gradient(to top, #2A3D20 0%, rgba(42,61,32,0.6) 50%, transparent 100%)',
+        clipPath: 'polygon(0% 100%, 0% 30%, 15% 10%, 30% 25%, 45% 5%, 55% 20%, 70% 8%, 80% 30%, 100% 15%, 100% 100%)',
+      }} />
+      <div className="absolute bottom-0 right-0 w-[15%] h-[65%] pointer-events-none" style={{
+        background: 'linear-gradient(to top, #2A3D20 0%, rgba(42,61,32,0.5) 50%, transparent 100%)',
+        clipPath: 'polygon(0% 100%, 0% 20%, 20% 8%, 35% 22%, 50% 5%, 65% 18%, 80% 10%, 100% 25%, 100% 100%)',
+      }} />
+
+      {/* Fog Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-[5]" />
+
+      {/* Green ground fog */}
+      <div className="absolute bottom-0 left-0 right-0 h-[30%] pointer-events-none z-[6]"
+        style={{
+          background: 'linear-gradient(to top, rgba(100,140,60,0.06) 0%, rgba(80,120,40,0.03) 50%, transparent 100%)',
+          animation: 'fogDrift 20s ease-in-out infinite',
+        }}
+      />
 
       {/* Fireflies */}
-      {fireflies.map((ff) => (
-        <div
-          key={ff.id}
-          className="absolute pointer-events-none z-[7]"
-          style={{
-            left: `${ff.left}%`,
-            top: `${ff.top}%`,
-            width: `${ff.size}px`,
-            height: `${ff.size}px`,
-            background: `radial-gradient(circle, rgba(232,200,64,0.9) 0%, rgba(232,200,64,0.3) 40%, transparent 70%)`,
-            borderRadius: '50%',
-            animation: `fireflyFloat ${ff.duration}s ease-in-out ${ff.delay}s infinite, fireflyGlow 2s ease-in-out ${ff.delay}s infinite alternate`,
-            '--ff-dx': `${ff.dx}px`,
-            '--ff-dy': `${ff.dy}px`,
-          } as React.CSSProperties}
-        />
-      ))}
+      <div className="absolute inset-0 pointer-events-none z-[7]">
+        {fireflies.map((ff) => (
+          <div
+            key={ff.id}
+            className="absolute rounded-full"
+            style={{
+              left: `${ff.x}%`,
+              top: `${ff.y}%`,
+              width: `${ff.size}px`,
+              height: `${ff.size}px`,
+              background: 'rgba(232,200,64,0.9)',
+              boxShadow: `0 0 ${ff.size * 3}px rgba(232,200,64,0.5), 0 0 ${ff.size * 6}px rgba(232,200,64,0.2)`,
+              animation: `fireflyFloat ${ff.duration}s ease-in-out ${ff.delay}s infinite, fireflyBlink ${ff.blinkDuration}s ease-in-out ${ff.blinkDelay}s infinite`,
+              transform: `translate(${mousePos.x * ff.driftX * ff.parallaxFactor}px, ${mousePos.y * ff.driftY * ff.parallaxFactor}px)`,
+              transition: 'transform 0.8s ease-out',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Light Spots (unlockable) */}
+      <div className="absolute inset-0 z-[8]">
+        {lightSpots.map((sp) => {
+          const isUnlocked = unlockedIds.has(sp.species.id);
+          const isRecent = recentlyClicked.has(sp.species.id);
+          // Dimmed when recently clicked, full glow otherwise
+          const isDiscovered = isUnlocked && isRecent;
+
+          // Mouse parallax offset
+          const parallaxX = mousePos.x * sp.driftX * sp.parallaxFactor;
+          const parallaxY = mousePos.y * sp.driftY * sp.parallaxFactor;
+
+          return (
+            <div
+              key={sp.species.id}
+              className="absolute cursor-pointer group"
+              style={{
+                left: `${sp.baseX}%`,
+                top: `${sp.baseY}%`,
+                zIndex: 8 + Math.round(sp.lightSize / 10),
+                animation: `lightSpotDrift ${sp.driftDuration}s ease-in-out ${sp.driftDelay}s infinite`,
+                transform: `translate(${parallaxX}px, ${parallaxY}px)`,
+                transition: 'transform 0.6s ease-out',
+              }}
+              onClick={() => onSpeciesClick(sp.species)}
+            >
+              <div
+                className={`
+                  relative rounded-full transition-all duration-700 ease-out
+                  ${isDiscovered ? 'scale-75' : 'scale-100 hover:scale-110'}
+                `}
+                style={{
+                  width: `${sp.lightSize * 2}px`,
+                  height: `${sp.lightSize * 2}px`,
+                  animation: `lightSpotFloat ${sp.floatDuration}s cubic-bezier(0.25,0.46,0.45,0.94) ${sp.floatDelay}s infinite, lightSpotBreath ${sp.breathDuration}s ease-in-out ${sp.breathDelay}s infinite`,
+                }}
+              >
+                {/* Main glow */}
+                <div
+                  className="absolute inset-0 rounded-full transition-all duration-700"
+                  style={{
+                    background: isDiscovered
+                      ? `radial-gradient(circle, rgba(232,200,64,0.2) 0%, rgba(184,212,48,0.06) 50%, transparent 100%)`
+                      : `radial-gradient(circle, rgba(232,200,64,0.5) 0%, rgba(184,212,48,0.2) 50%, transparent 100%)`,
+                    boxShadow: isDiscovered
+                      ? `0 0 ${sp.lightSize * 0.8}px rgba(232,200,64,0.1)`
+                      : `0 0 ${sp.lightSize * 2}px rgba(232,200,64,0.2), 0 0 ${sp.lightSize * 4}px rgba(184,212,48,0.08)`,
+                  }}
+                />
+                {/* Core */}
+                <div
+                  className="absolute rounded-full transition-all duration-700"
+                  style={{
+                    top: '30%', left: '30%', width: '40%', height: '40%',
+                    background: isDiscovered
+                      ? 'radial-gradient(circle, rgba(255,240,180,0.25) 0%, rgba(232,200,64,0.08) 100%)'
+                      : 'radial-gradient(circle, rgba(255,240,180,0.8) 0%, rgba(232,200,64,0.3) 100%)',
+                    boxShadow: isDiscovered
+                      ? `0 0 ${sp.lightSize * 0.3}px rgba(255,240,180,0.08)`
+                      : `0 0 ${sp.lightSize * 0.6}px rgba(255,240,180,0.4)`,
+                  }}
+                />
+                {/* Discovered indicator */}
+                {isDiscovered && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs opacity-30">{sp.emoji}</span>
+                  </div>
+                )}
+                {/* Hover ring */}
+                <div className="absolute inset-[-4px] rounded-full border border-[rgba(232,200,64,0)] group-hover:border-[rgba(232,200,64,0.3)] transition-all duration-300" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Falling leaves */}
-      {leaves.map((leaf) => (
-        <div
-          key={leaf.id}
-          className="absolute pointer-events-none z-[8]"
-          style={{
-            left: `${leaf.left}%`,
-            top: '-20px',
-            animation: `leafFall ${leaf.duration}s linear ${leaf.delay}s infinite`,
-            '--leaf-sway': `${leaf.sway}px`,
-          } as React.CSSProperties}
-        >
-          <svg width={leaf.size} height={leaf.size * 0.6} viewBox="0 0 20 12">
-            <path
-              d="M10,0 Q15,3 18,6 Q15,9 10,12 Q5,9 2,6 Q5,3 10,0 Z"
-              fill={leaf.hue}
-              opacity={0.5}
-            />
-            <line x1="10" y1="1" x2="10" y2="11" stroke={leaf.hue} strokeWidth="0.5" opacity={0.3} />
-          </svg>
-        </div>
-      ))}
-
-      {/* Light spots (interactive) — always visible, discovered ones are dimmer */}
-      {species.map((sp, idx) => {
-        const params = spotParams[idx];
-        const isDiscovered = unlockedIds.has(sp.id);
-
-        return (
+      <div className="absolute inset-0 pointer-events-none z-[9]">
+        {leaves.map((leaf) => (
           <div
-            key={sp.id}
-            className="absolute z-[9]"
+            key={leaf.id}
+            className="absolute"
             style={{
-              left: `${sp.position.x}%`,
-              top: `${sp.position.y}%`,
-              transform: 'translate(-50%, -50%)',
+              left: `${leaf.x}%`,
+              top: `${leaf.startY}%`,
+              width: `${leaf.size}px`,
+              height: `${leaf.size * 1.4}px`,
+              background: leaf.color,
+              borderRadius: '50% 0 50% 0',
+              opacity: 0.35,
+              animation: `leafFall ${leaf.duration}s linear ${leaf.delay}s infinite`,
             }}
           >
-            {/* Outer glow halo — always present */}
             <div
-              className="absolute rounded-full pointer-events-none"
+              className="w-full h-full"
               style={{
-                inset: `-${sp.lightSize * 0.6}px`,
-                background: `radial-gradient(circle, rgba(232,200,64,${isDiscovered ? 0.08 : 0.15}) 0%, rgba(184,212,48,${isDiscovered ? 0.03 : 0.06}) 40%, transparent 70%)`,
-                animation: `haloBreath ${params.breathDuration}s ease-in-out ${params.breathDelay}s infinite`,
+                animation: `leafSway ${leaf.swayAmount / 10}s ease-in-out ${leaf.delay}s infinite, leafRotate ${leaf.rotationSpeed / 10}s linear infinite`,
+                transformOrigin: 'center center',
               }}
             />
-            <div
-              className={`light-spot light-spot-float ${isDiscovered ? 'light-spot-discovered' : ''}`}
-              style={{
-                width: `${sp.lightSize}px`,
-                height: `${sp.lightSize}px`,
-                '--float-duration': `${params.floatDuration}s`,
-                '--dx1': `${params.dx1}px`,
-                '--dy1': `${params.dy1}px`,
-                '--dx2': `${params.dx2}px`,
-                '--dy2': `${params.dy2}px`,
-                '--dx3': `${params.dx3}px`,
-                '--dy3': `${params.dy3}px`,
-                '--dx4': `${params.dx4}px`,
-                '--dy4': `${params.dy4}px`,
-              } as React.CSSProperties}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSpeciesClick(sp);
-              }}
-            >
-              {/* Core glow */}
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: isDiscovered
-                    ? `radial-gradient(circle at 40% 40%, rgba(232,200,64,0.35) 0%, rgba(184,212,48,0.15) 40%, rgba(184,212,48,0.05) 70%, transparent 100%)`
-                    : `radial-gradient(circle at 40% 40%, rgba(255,230,100,0.7) 0%, rgba(232,200,64,0.4) 30%, rgba(184,212,48,0.15) 60%, transparent 100%)`,
-                  boxShadow: isDiscovered
-                    ? `0 0 ${sp.lightSize * 0.5}px rgba(232,200,64,0.15)`
-                    : `0 0 ${sp.lightSize}px rgba(232,200,64,0.3), 0 0 ${sp.lightSize * 2}px rgba(184,212,48,0.15)`,
-                }}
-              />
-              {/* Specular highlight */}
-              <div
-                className="absolute rounded-full"
-                style={{
-                  top: '15%',
-                  left: '25%',
-                  width: '30%',
-                  height: '25%',
-                  background: `radial-gradient(ellipse, rgba(255,255,220,${isDiscovered ? 0.2 : 0.6}) 0%, transparent 70%)`,
-                }}
-              />
-              {/* Discovered: emoji indicator */}
-              {isDiscovered && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm opacity-50">{sp.emoji}</span>
-                </div>
-              )}
-            </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
 
-      {/* Foreground ground mist */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-32 z-[10] pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, rgba(50,65,40,0.6) 0%, rgba(50,65,40,0.2) 50%, transparent 100%)',
-        }}
+      {/* Top vignette */}
+      <div className="absolute inset-0 pointer-events-none z-[10]"
+        style={{ background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(20,30,15,0.4) 100%)' }}
       />
     </div>
   );

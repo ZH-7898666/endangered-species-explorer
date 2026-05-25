@@ -629,6 +629,50 @@ body {
   100% { background-position: 200% 0; }
 }
 
+/* ========== Bioluminescent Particle ========== */
+@keyframes bioParticleFloat {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(8px, -12px); }
+  50% { transform: translate(-5px, 6px); }
+  75% { transform: translate(10px, -4px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes bioParticleBlink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ========== Jellyfish Tentacle ========== */
+@keyframes jellyfishTentacle {
+  0%, 100% { transform: scaleX(1) translateY(0); }
+  25% { transform: scaleX(0.85) translateY(3px); }
+  50% { transform: scaleX(1.1) translateY(-2px); }
+  75% { transform: scaleX(0.9) translateY(2px); }
+}
+
+/* ========== God Ray Sway ========== */
+@keyframes godRaySway {
+  0%, 100% { transform: skewX(6deg) translateX(0); }
+  50% { transform: skewX(4deg) translateX(15px); }
+}
+
+/* ========== Bubble Drift (ocean autonomous float) ========== */
+@keyframes bubbleDrift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(6px, -10px); }
+  40% { transform: translate(-4px, -6px); }
+  60% { transform: translate(8px, 4px); }
+  80% { transform: translate(-6px, -8px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ========== Bubble Breath ========== */
+@keyframes bubbleBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .species-card {

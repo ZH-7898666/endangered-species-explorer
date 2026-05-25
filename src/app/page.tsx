@@ -23,11 +23,31 @@ export default function Home() {
   const panStart = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Mouse position for parallax effect (normalized -1 to 1)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  // Ref for latest mouse position to avoid stale closures
+  const mousePosRef = useRef({ x: 0, y: 0 });
+
+  // Track recently clicked species for 5s restore effect
+  const [recentlyClicked, setRecentlyClicked] = useState<Set<string>>(new Set());
+
   const currentSpeciesList = currentScene === 'forest' ? forestSpecies : oceanSpecies;
   const unlockedCount = currentSpeciesList.filter((s) => unlockedIds.has(s.id)).length;
   const totalCount = currentSpeciesList.length;
 
-  // Allow re-clicking discovered species — they stay visible and clickable
+  // Track mouse movement for parallax
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;  // -1 to 1
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
+      mousePosRef.current = { x: nx, y: ny };
+      setMousePos({ x: nx, y: ny });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Handle species click — set recentlyClicked for 5s glow restore
   const handleSpeciesClick = useCallback(
     (species: Species) => {
       if (isCardOpen) return;
@@ -35,6 +55,8 @@ export default function Home() {
       setSelectedSpecies(species);
       setIsCardOpen(true);
       setIsCardClosing(false);
+      // Mark as recently clicked (dimmed state)
+      setRecentlyClicked((prev) => new Set([...prev, species.id]));
     },
     [isCardOpen]
   );
@@ -47,6 +69,15 @@ export default function Home() {
       setSelectedSpecies(null);
     }, 300);
   }, []);
+
+  // Auto-restore recently clicked species after 5 seconds
+  useEffect(() => {
+    if (recentlyClicked.size === 0) return;
+    const timer = setTimeout(() => {
+      setRecentlyClicked(new Set());
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [recentlyClicked]);
 
   const switchScene = useCallback(
     (target: SceneType) => {
@@ -90,7 +121,7 @@ export default function Home() {
     [zoom, panOffset]
   );
 
-  const handleMouseMove = useCallback(
+  const handleContainerMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isDragging.current) return;
       const dx = e.clientX - dragStart.current.x;
@@ -112,7 +143,7 @@ export default function Home() {
       ref={containerRef}
       className="fixed inset-0 overflow-hidden cursor-grab active:cursor-grabbing select-none"
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
+      onMouseMove={handleContainerMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
@@ -136,8 +167,10 @@ export default function Home() {
           <ForestScene
             species={forestSpecies}
             unlockedIds={unlockedIds}
+            recentlyClicked={recentlyClicked}
             onSpeciesClick={handleSpeciesClick}
             isVisible={currentScene === 'forest' && !isTransitioning}
+            mousePos={mousePos}
           />
         </div>
 
@@ -154,8 +187,10 @@ export default function Home() {
           <OceanScene
             species={oceanSpecies}
             unlockedIds={unlockedIds}
+            recentlyClicked={recentlyClicked}
             onSpeciesClick={handleSpeciesClick}
             isVisible={currentScene === 'ocean' && !isTransitioning}
+            mousePos={mousePos}
           />
         </div>
       </div>
