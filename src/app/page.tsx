@@ -175,8 +175,8 @@ export default function Home() {
             unlockedIds={unlockedIds}
             recentlyClicked={recentlyClicked}
             onSpeciesClick={handleSpeciesClick}
-            isVisible={true}
             mousePos={mousePos}
+            burstingId={burstingId}
           />
         ) : (
           <OceanScene
