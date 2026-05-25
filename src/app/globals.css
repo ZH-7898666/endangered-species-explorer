@@ -860,6 +860,35 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* ========== Loading Screen ========== */
+@keyframes particleConverge {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.3);
+    opacity: 0.8;
+  }
+}
+
+@keyframes loadingBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .species-card {

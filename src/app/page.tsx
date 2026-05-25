@@ -6,6 +6,7 @@ import { ForestScene } from '@/components/forest-scene';
 import OceanScene from '@/components/ocean-scene';
 import { SpeciesCard } from '@/components/species-card';
 import { forestSpecies, oceanSpecies } from '@/data/species';
+import LoadingScreen from '@/components/loading-screen';
 
 // World is 2x the viewport size - elements are spread across this larger space
 const WORLD_SCALE = 2.0;
@@ -19,6 +20,7 @@ export default function Home() {
   const [burstingId, setBurstingId] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Viewport camera: zoom and pan within the larger world
   const [zoom, setZoom] = useState(1.0);
@@ -29,6 +31,10 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoading(false);
+  }, []);
 
   // Mouse position for parallax (normalized -1 to 1)
   useEffect(() => {
@@ -141,6 +147,10 @@ export default function Home() {
 
   if (!isMounted) {
     return <div className="w-screen h-screen bg-black" />;
+  }
+
+  if (isLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
   return (
