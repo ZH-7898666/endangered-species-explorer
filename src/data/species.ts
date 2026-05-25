@@ -333,6 +333,216 @@ export const forestSpecies: Species[] = [
     imageUrl:
       'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_38849258-14d6-452b-9a39-134b9611c156.jpeg?sign=1811251621-26e47ff0f9-0-45a8632a6e1cce137d4b0265e987e75bfea73442d85fc0392b057091d9c0ef6c',
   },
+  {
+    id: 'malayan-tapir',
+    name: '马来貘',
+    latinName: 'Tapirus indicus',
+    category: 'forest',
+    level: 'EN',
+    levelName: '濒危',
+    description:
+      '马来貘是奇蹄目貘科貘属的大型哺乳动物，是东南亚热带雨林的标志性物种，也是亚洲唯一现存的貘类。马来貘最显著的特征是身体前半部分和四肢为黑色，后半部分为白色，这种独特的黑白配色被称为"鞍状纹"，在密林月光下能产生视觉破碎效果，帮助它们融入斑驳的林间光影。马来貘体型庞大，体重可达300-400公斤，却极其温顺害羞，主要在夜间活动，以嫩叶、果实和水生植物为食。',
+    habitat: '东南亚热带低地雨林、山地森林、沼泽地带',
+    funFact:
+      '马来貘的鼻子和上唇演化成了一个灵活的"短象鼻"，可以卷曲抓取树叶，也能在水下像呼吸管一样伸出水面呼吸！貘类被称为"活化石"——它们的身体形态在过去3500万年里几乎没有变化，是地球上最古老的大型哺乳动物类群之一。幼年马来貘全身布满白色条纹和斑点，像一颗行走的西瓜，这种伪装色在斑驳的林间光影中极为有效。',
+    threats: '热带雨林大规模砍伐、棕榈油种植园扩张、非法捕猎、道路建设导致栖息地破碎化',
+    citesStatus: 'CITES 附录I',
+    population: '全球约2,500-3,000只（持续下降）',
+    emoji: '🦓',
+    position: { x: 30, y: 70 },
+    lightSize: 42,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_ae9ef9ba-0d80-475b-b0e6-d31f50ef584b.jpeg?sign=1811261944-32c1cf367f-0-05216ae7047816898bf8d240207dd10fefe0e8892b1225f63b129cab67d0f4d2',
+  },
+  {
+    id: 'slow-loris',
+    name: '懒猴',
+    latinName: 'Nycticebus',
+    category: 'forest',
+    level: 'EN',
+    levelName: '濒危',
+    description:
+      '懒猴是灵长目懒猴科懒猴属的小型夜行性灵长类动物，广泛分布在东南亚的热带、亚热带森林中。懒猴拥有一双巨大的圆形眼睛，可以在极暗的夜间看清猎物，是东南亚热带雨林中最可爱的夜行者。懒猴行动缓慢但极其精准，以昆虫、树胶、花蜜和果实为食。懒猴是世界上唯一的有毒灵长类动物——它们手臂内侧的腺体会分泌毒性油脂，与唾液混合后可产生剧毒，用于防御和捕猎。',
+    habitat: '东南亚热带雨林、竹林、果园、次生林',
+    funFact:
+      '懒猴是唯一的"毒液灵长类"——它们会将毒液涂抹在幼崽身上作为保护！被懒猴咬伤后会出现过敏性休克，严重时可能致命。懒猴在宠物贸易中极受欢迎，但被贩卖前商贩会残忍地拔掉它们的牙齿——这是导致大量懒猴死亡的直接原因。懒猴的"举手"动作看似可爱，实际上是在激活毒腺的防御姿势。',
+    threats: '非法宠物贸易（拔牙贩卖）、栖息地破坏、传统药用捕猎、社交媒体传播助长宠物需求',
+    citesStatus: 'CITES 附录I',
+    population: '全球野生种群持续下降，部分物种极度濒危',
+    emoji: '🐵',
+    position: { x: 65, y: 35 },
+    lightSize: 28,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_740259cd-30a5-409b-9f19-2185cf56874a.jpeg?sign=1811261947-605d42a237-0-fd62879bc622e2dee951d2021e3d7c41363a88aa6334edcfd7c46f8dd2136606',
+  },
+  {
+    id: 'sun-bear',
+    name: '马来熊',
+    latinName: 'Helarctos malayanus',
+    category: 'forest',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '马来熊是食肉目熊科马来熊属的小型熊类，是世界上体型最小的熊，体长仅约120-150厘米，体重27-65公斤。马来熊胸前有一标志性的金色U形或新月形斑纹，因此也被称为"太阳熊"。马来熊拥有所有熊类中最长的舌头（可达25厘米），用于伸入蜂巢舔食蜂蜜和掏取白蚁，是热带雨林中不可或缺的"蜂蜜爱好者"。马来熊是树栖性最强的熊类，大部分时间在树冠层活动，是热带雨林的"空中杂技演员"。',
+    habitat: '东南亚热带低地雨林、山地森林',
+    funFact:
+      '马来熊的舌头长达25厘米，可以深入蜂巢和蚁穴取食——当地人因此称它为"蜜熊"。马来熊是森林的"种子传播者"——它们吃下的果实种子经过消化道后随粪便排出，帮助植物扩散。马来熊的幼崽会骑在妈妈背上活动，这在熊类中是独一无二的行为！它们还会建造"树床"——用树枝和树叶在树上搭建舒适的休息平台。',
+    threats: '热带雨林砍伐、棕榈油种植园扩张、非法捕猎（熊胆贸易）、宠物贸易',
+    citesStatus: 'CITES 附录I',
+    population: '全球野生种群在过去30年下降超过30%',
+    emoji: '🐻',
+    position: { x: 45, y: 55 },
+    lightSize: 38,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_023fe865-1d12-4324-a158-191d1cce7a19.jpeg?sign=1811261945-e62583e167-0-5646d955500e1e6af46739ac93c1101b640fa1ec3a81de342f39e1c092932625',
+  },
+  {
+    id: 'proboscis-monkey',
+    name: '长鼻猴',
+    latinName: 'Nasalis larvatus',
+    category: 'forest',
+    level: 'EN',
+    levelName: '濒危',
+    description:
+      '长鼻猴是灵长目猴科长鼻猴属的大型灵长类动物，是婆罗洲的特有物种。长鼻猴最显著的特征是雄性拥有一个巨大而下垂的鼻子，长度可达10厘米以上，在激动时会充血膨胀变大。这个大鼻子既是性选择的标志，也是声音共鸣的"扩音器"——雄性通过鼻子发出响亮的鼻音叫声来宣示领地和吸引雌性。长鼻猴是唯一会反刍的灵长类动物，拥有像牛一样的多室胃，可以消化含有毒素的红树林树叶。',
+    habitat: '婆罗洲红树林、沼泽林、河流沿岸低地雨林',
+    funFact:
+      '长鼻猴的大鼻子不仅是"颜值"标志——它还是一个天然扩音器，雄性能通过鼻子发出响亮的"鼻音号角"声！长鼻猴是灵长类中唯一的"反刍专家"——拥有3-4个胃室，可以消化其他猴子无法食用的有毒树叶。长鼻猴的脚趾间有半蹼，是游泳健将——它们经常跳入河中游泳，甚至能潜水逃生。幼年长鼻猴出生时脸是蓝色的，随着年龄增长逐渐变暗！',
+    threats: '红树林砍伐、棕榈油种植园扩张、森林火灾、非法捕猎',
+    citesStatus: 'CITES 附录I',
+    population: '全球约7,000只（持续下降）',
+    emoji: '🐒',
+    position: { x: 20, y: 40 },
+    lightSize: 34,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_0a3c6be6-d71b-45ee-ba4e-a8370c878c6d.jpeg?sign=1811261944-f41cc41e3b-0-dd268707f803e489b7b89928cb7332b0de6947023e67ae112d7f6a59c50c59a8',
+  },
+  {
+    id: 'sunda-pangolin',
+    name: '穿山甲',
+    latinName: 'Manis javanica',
+    category: 'forest',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '穿山甲是鳞甲目穿山甲科穿山甲属的哺乳动物，是世界上被非法贩卖最多的野生哺乳动物——每5分钟就有一只穿山甲被捕获。穿山甲全身覆盖着由角蛋白构成的坚硬鳞片（与人类指甲成分相同），受威胁时会蜷缩成球状，鳞片如同盔甲般保护身体。遗憾的是，这种完美的防御机制反而成了致命弱点——蜷缩的穿山甲极易被拾取，使盗猎变得毫不费力。穿山甲没有牙齿，靠一条比身体还长的黏性舌头捕食蚂蚁和白蚁，一只穿山甲每年可吃掉约700万只蚂蚁。',
+    habitat: '东南亚热带雨林、次生林、灌丛、农田边缘',
+    funFact:
+      '穿山甲是地球上被走私最多的哺乳动物——占全球非法野生动物贸易的20%！穿山甲的鳞片与人类指甲成分完全相同（角蛋白），没有任何药用价值，但传统医学仍大量使用。穿山甲的舌头从骨盆根部生长，比整个身体还要长，可以深入蚁穴40厘米！穿山甲宝宝会骑在妈妈尾巴上出行，鳞片朝外形成"活盔甲"。穿山甲是森林的"天然害虫控制师"——每只每年可消灭700万只白蚁和蚂蚁。',
+    threats: '非法捕猎和贸易（鳞片药用、肉食用）、栖息地破坏、棕榈油种植园扩张',
+    citesStatus: 'CITES 附录I',
+    population: '全球种群在过去20年下降超过80%',
+    emoji: '🐾',
+    position: { x: 78, y: 65 },
+    lightSize: 30,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_20bef334-eea1-4563-a1c8-d716384c0008.jpeg?sign=1811261997-296e61e2a8-0-e93864a39d17d9a6ff686d177db6cf141155a4ce95cd2e65174af0ae94a73fa2',
+  },
+  {
+    id: 'amur-leopard',
+    name: '远东豹',
+    latinName: 'Panthera pardus orientalis',
+    category: 'forest',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '远东豹是猫科豹属的亚种，是世界上最稀有的大型猫科动物之一，仅分布在俄罗斯远东地区和中国东北的温带阔叶混交林中。远东豹拥有所有豹亚种中最厚实、最华丽的毛皮——密集的玫瑰状斑纹在冬季会变得更加深长，以适应零下30℃的严寒。远东豹是独居性动物，领地范围可达数百平方公里，是真正的"森林之王"。它们是极其出色的攀爬者，可以将比自身还重的猎物拖上树冠，防止被其他掠食者抢夺。',
+    habitat: '温带阔叶混交林、山地针叶林、河流谷地',
+    funFact:
+      '远东豹是"猫科界的超级模特"——毛皮上的玫瑰状花纹比任何时尚品牌都精致，且每只豹的花纹都独一无二，如同指纹！远东豹能在零下30℃的严寒中生存，是唯一适应雪地环境的豹亚种。它们是"力与美的化身"——能拖动比自身重2倍的猎物爬上10米高的树！全球野生远东豹的数量曾一度不足30只，经过严格保护后缓慢恢复至约120只，是大型猫科动物保护中最艰难的战役之一。',
+    threats: '栖息地破碎化、猎物基数下降、盗猎（毛皮贸易）、与东北虎竞争、近亲繁殖',
+    citesStatus: 'CITES 附录I',
+    population: '全球约120-130只（2024年估计）',
+    emoji: '🐆',
+    position: { x: 55, y: 25 },
+    lightSize: 40,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_f7419caf-7ed6-480b-9753-3177d593c2af.jpeg?sign=1811261945-9b0b7179b4-0-68c05c793629364cbbb0ce100804bec11a0a6381889e76a37ef5c7408918c714',
+  },
+  {
+    id: 'golden-eagle',
+    name: '金雕',
+    latinName: 'Aquila chrysaetos',
+    category: 'forest',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '金雕是鹰形目鹰科雕属的大型猛禽，是北半球分布最广的大型雕类之一，也是中国文化中"雕"的原型物种。金雕翼展可达2.3米，俯冲速度可达320公里/小时，是天空中的顶级猎手。金雕拥有极其敏锐的视力，可以在3公里外发现猎物，视觉分辨率是人类的8倍。金雕终生配对，每对会建立多个巢穴并在不同年份轮换使用，有些巢穴经过代代修缮可达2米高、1吨重。',
+    habitat: '山地森林、悬崖岩壁、开阔草原、高原地区',
+    funFact:
+      '金雕的俯冲速度可达320公里/小时——比高铁还快！金雕的握力达到440 PSI（磅/平方英寸），是人类的10倍——可以在飞行中捏碎猎物的骨骼。金雕夫妇会共同筑巢，有些巢穴经过几代雕修缮后重量超过1吨，堪称"空中城堡"。蒙古族的猎人至今仍骑着马、手臂上架着金雕进行传统狩猎——这项古老传统已有6000年历史！',
+    threats: '栖息地破坏、非法捕猎、农药二次中毒、风电场碰撞、人为干扰',
+    citesStatus: 'CITES 附录II',
+    population: '全球约30万只，但部分地区种群严重下降',
+    emoji: '🦅',
+    position: { x: 38, y: 18 },
+    lightSize: 36,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_b334253c-9361-429c-802c-2a0d2edef0cb.jpeg?sign=1811261944-42db361b83-0-5841b4ac94a3bf0579bd69c6382fec36f9ac44f130b67f360bd123384bf9e77f',
+  },
+  {
+    id: 'bornean-orangutan',
+    name: '婆罗洲猩猩',
+    latinName: 'Pongo pygmaeus',
+    category: 'forest',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '婆罗洲猩猩是灵长目人科猩猩属的大型类人猿，是人类的近亲之一，DNA相似度达97%。婆罗洲猩猩拥有红色的长毛、宽阔的面颊肉垫（雄性）和极高的智力——它们会制造工具、使用树叶做手套和雨伞、甚至能学会手语交流。猩猩是最大的树栖哺乳动物，雄性体重可达90公斤，却能在树冠间灵活穿行。它们每天晚上都会用树枝和树叶搭建新的"床铺"——一生中要建造超过3万个巢穴。',
+    habitat: '婆罗洲热带低地和山地雨林、泥炭沼泽林',
+    funFact:
+      '婆罗洲猩猩是"森林的建筑师"——每天晚上都会用树枝搭建新巢，一生建造超过3万个！猩猩的臂展可达2.4米，是真正的"丛林泰山"。它们的智力极高——会用树叶当手套处理带刺的果实、用树枝钓白蚁、甚至学会了手语。猩猩妈妈照顾幼崽长达8年——是哺乳动物中除人类外最长的育儿期！过去20年，婆罗洲猩猩失去了超过一半的栖息地，主要原因是棕榈油种植园的扩张。',
+    threats: '棕榈油种植园大规模砍伐雨林、森林火灾、非法宠物贸易、猎杀',
+    citesStatus: 'CITES 附录I',
+    population: '全球约104,700只（持续快速下降）',
+    emoji: '🦧',
+    position: { x: 50, y: 42 },
+    lightSize: 44,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_77fb6151-bc91-492a-901c-6f5019453bb5.jpeg?sign=1811261971-af941a3ffb-0-bbd1c7337486869c5abd78f1cc4a44e2d87705090d5453b97c509631cc917468',
+  },
+  {
+    id: 'japanese-giant-salamander',
+    name: '日本大鲵',
+    latinName: 'Andrias japonicus',
+    category: 'forest',
+    level: 'NT',
+    levelName: '近危',
+    description:
+      '日本大鲵是有尾目隐鳃鲵科大鲵属的两栖动物，是世界上最长的两栖动物——体长可达1.5米，体重超过25公斤。日本大鲵是真正的"活化石"——其祖先可追溯至1.7亿年前的侏罗纪，身体形态在过去数千万年间几乎没有变化。日本大鲵完全水生，终生保留幼体特征（鳃裂退化但保留呼吸功能），皮肤布满皱纹和褶皱用于增加氧气吸收面积。它们是山区溪流的顶级捕食者，可以10年不进食仍存活。',
+    habitat: '日本中部和西部山区清澈溪流、河流、湖泊',
+    funFact:
+      '日本大鲵是两栖动物中的"老祖宗"——其血统可追溯至1.7亿年前的侏罗纪，与恐龙同时代！日本大鲵的代谢极其缓慢——可以长达10年不进食仍然存活，堪称动物界的"辟谷大师"。它们的皮肤布满褶皱，是为了增大表面积吸收水中溶解氧——这种"皮肤呼吸"效率极高，几乎不需要肺部。日本大鲵的咬合力惊人——可以轻松咬断人的手指！在日本当地被称为"半截子"，因为常被误认为是河童（日本水妖）的原型。',
+    threats: '栖息地河流改道和筑坝、水污染、与外来种美洲大鲵杂交、气候变化',
+    citesStatus: 'CITES 附录I',
+    population: '全球种群持续下降',
+    emoji: '🦎',
+    position: { x: 42, y: 80 },
+    lightSize: 28,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_35b3d1c1-160a-4963-801a-45317ecb2b36.jpeg?sign=1811262001-f6007f6582-0-0f6ffe526bc26069f12f924d57c31a6d42ce3c9eef719ae14e472ffa6e85d486',
+  },
+  {
+    id: 'philippine-eagle',
+    name: '食猿雕',
+    latinName: 'Pithecophaga jefferyi',
+    category: 'forest',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '食猿雕是鹰形目鹰科食猿雕属的大型猛禽，是菲律宾的国鸟，也是世界上最稀有、最强大的森林雕类。食猿雕翼展可达2.2米，拥有极其华丽的羽冠和锐利的目光，被誉为"森林之王"和"空中之虎"。食猿雕是热带雨林的顶级捕食者，以猴子、飞鼠、蝙蝠和大型蜥蜴为食——它是世界上唯一以灵长类为主要猎物的猛禽。每对食猿雕需要25-50平方公里的领地，繁殖率极低——每2年才繁殖一次，每次只产一枚卵。',
+    habitat: '菲律宾热带低地和山地原始雨林',
+    funFact:
+      '食猿雕是"热带雨林的天空之王"——翼展超过2米，是世界上最大、最强壮的森林雕类！食猿雕每2年才繁殖一次，每次只产1枚卵——是鸟类中繁殖率最低的物种之一。幼鸟需要5-7个月才能离巢，期间父母双方轮流照料。食猿雕的羽冠在兴奋时会竖起——如同戴了一顶华丽的王冠！菲律宾将食猿雕列为国鸟，杀一只最高可判12年监禁。然而即便有法律保护，它们的栖息地仍以惊人速度消失。',
+    threats: '热带雨林大规模砍伐、采矿、农业开发、非法射杀',
+    citesStatus: 'CITES 附录I',
+    population: '全球约800只（极度濒危）',
+    emoji: '🦅',
+    position: { x: 15, y: 55 },
+    lightSize: 36,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8681789f-ad12-4af8-9ff5-11491bcc117a.jpeg?sign=1811262001-313683ff9-0-e6bbbfc7988ea027e02ad944ae990f5952528da2c0d9b88999351bd61b767413',
+  },
 ];
 
 export const oceanSpecies: Species[] = [
@@ -713,6 +923,153 @@ export const oceanSpecies: Species[] = [
     lightSize: 36,
     imageUrl:
       'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_d4e15846-e89b-40cf-b1d7-ae583559b8fa.jpeg?sign=1811254721-f3026cc9e6-0-042a1d1f135b0a852de1d2372464da8f854b0f54edf8b5b015abb12f35a701f6',
+  },
+  {
+    id: 'beluga-whale',
+    name: '白鲸',
+    latinName: 'Delphinapterus leucas',
+    category: 'ocean',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '白鲸是鲸目一角鲸科白鲸属的中型鲸类，是北极最具代表性的海洋哺乳动物。白鲸通体纯白，额头上有一个圆润的脂肪隆起称为"额隆"，可以改变形状发出各种表情。白鲸被称为"海洋金丝雀"——它们是鲸类中叫声最丰富多样的物种，能发出口哨声、鸟鸣声、咔嗒声、铃铛声等至少11种不同的声音。白鲸极其聪明和好奇，会主动靠近人类、探出水面观察水上世界，水族馆中的白鲸甚至会模仿人类说话。',
+    habitat: '北极和亚北极海域、河口、浅海湾',
+    funFact:
+      '白鲸是"海洋的金丝雀"——能发出至少11种不同的声音，包括口哨声、鸟鸣声和咔嗒声，是鲸类中最"健谈"的！白鲸的额头（额隆）可以改变形状——就像一个会动的"表情包"，这帮助它们改变声波聚焦方向。白鲸的脖子异常灵活——是少数能转动头部的鲸类，可以左右摇头"说不"。水族馆中有白鲸学会了模仿人类说话——它们会用不同的声调"打招呼"！白鲸幼崽出生时是灰色的，5-8岁才会变白——这是成长的"勋章"。',
+    threats: '气候变化海冰减少、海洋污染（重金属和有机污染物）、船舶噪音干扰、石油开发',
+    citesStatus: 'CITES 附录II',
+    population: '全球约15万只，但部分种群极度濒危',
+    emoji: '🐋',
+    position: { x: 35, y: 30 },
+    lightSize: 42,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_90042d95-1b42-4020-adc8-6f6b8ce570cd.jpeg?sign=1811261973-96e8009b43-0-620996f05d206b7e475e5a59d87021bdc8475f54b64855e2844c87191d67c4ff',
+  },
+  {
+    id: 'narwhal',
+    name: '独角鲸',
+    latinName: 'Monodon monoceros',
+    category: 'ocean',
+    level: 'NT',
+    levelName: '近危',
+    description:
+      '独角鲸是鲸目一角鲸科独角鲸属的中型鲸类，被称为"海中独角兽"——雄性独角鲸拥有一根从上唇伸出的螺旋形长牙，长度可达2.5-3米，这是大自然最神秘的器官之一。长久以来人们以为独角鲸的长牙是"角"，但科学研究发现它其实是一颗左犬齿——而且是唯一一颗突破唇面向外螺旋生长的牙齿。这颗牙并非用于战斗，而是布满了数百万个神经末梢的"超级传感器"，可以感知水温、盐度、压力和水中猎物的存在。',
+    habitat: '北极海域、格陵兰岛和加拿大北部深水峡湾',
+    funFact:
+      '独角鲸的"角"其实是一颗牙——而且是一颗长反了的左犬齿！这颗牙上布满了1000万个神经末梢，是世界上最精密的"天然传感器"，可以感知水温、盐度和压力变化。中世纪欧洲人认为独角鲸的长牙是独角兽的角——一根牙的售价可以买下一座城堡！维京人正是靠贩卖"独角兽角"积累了巨额财富。独角鲸是"深潜冠军"——可以潜入1800米的深海，屏息长达25分钟！它们会集体"浮潜"——数十只同时垂直漂浮在水面上，露出长牙如同一片神秘的"牙之森林"。',
+    threats: '气候变化海冰减少、人类航运增加、石油勘探噪音、传统猎杀',
+    citesStatus: 'CITES 附录II',
+    population: '全球约8万只',
+    emoji: '🦄',
+    position: { x: 60, y: 22 },
+    lightSize: 40,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_a41999b4-01b9-47f3-aa9e-320367c17177.jpeg?sign=1811261970-a5f1335ff6-0-8e9b234c420ab76ad4d61891f916c2e8abf4d79d123d2113d1c9f559c1917005',
+  },
+  {
+    id: 'harp-seal',
+    name: '格陵兰海豹',
+    latinName: 'Pagophilus groenlandicus',
+    category: 'ocean',
+    level: 'NT',
+    levelName: '近危',
+    description:
+      '格陵兰海豹是食肉目海豹科格陵兰海豹属的中型海洋哺乳动物，是北极最标志性的动物之一。格陵兰海豹幼崽出生时全身覆盖雪白蓬松的胎毛，看起来像一团毛茸茸的白球，拥有黑色大而圆的眼睛，是世界上最可爱的幼年动物之一。这身白毛不仅是保暖神器，还是冰面上的完美伪装——在白色冰面上几乎不可见。幼崽在冰面上由母亲独自哺乳约12天，每天体重增加约2公斤，断奶时体重已是出生时的3倍，然后独自面对世界。',
+    habitat: '北大西洋和北极海域冰面、浮冰区',
+    funFact:
+      '格陵兰海豹宝宝是"冰上棉花糖"——出生时全身雪白蓬松，看起来像一颗会动的毛球！白毛不仅可爱，还是完美的冰面伪装。海豹妈妈能在成千上万只幼崽中通过气味准确找到自己的孩子。幼崽只哺乳12天就被断奶——但12天里体重翻3倍，堪称"极速增肥"！加拿大每年仍有商业性海豹猎杀，数十万只白毛海豹幼崽被棒击致死——这是全球最大规模的海洋哺乳动物屠杀。海豹可以在水下屏息15分钟，潜入500米深——是真正的"深潜选手"。',
+    threats: '商业猎杀（毛皮贸易）、气候变化海冰减少、海洋污染、渔网误捕',
+    citesStatus: 'CITES 附录III',
+    population: '全球约650万只，但部分种群因猎杀严重下降',
+    emoji: '🦭',
+    position: { x: 82, y: 38 },
+    lightSize: 36,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8c9cda09-2476-4be1-a43f-e30b2dcb1594.jpeg?sign=1811261998-429178ba15-0-83e33a640bc887ec753cd221c39ece9b1aec9276c7b5a35d916406688fc41bf2',
+  },
+  {
+    id: 'coelacanth',
+    name: '腔棘鱼',
+    latinName: 'Latimeria chalumnae',
+    category: 'ocean',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '腔棘鱼是腔棘鱼目腔棘鱼科腔棘鱼属的深海鱼类，是地球上最著名的"活化石"——科学家曾以为它们在6600万年前与恐龙一同灭绝，直到1938年一位南非博物馆馆主在渔获中发现了一条活着的腔棘鱼，轰动全球科学界。腔棘鱼体长可达1.8米，体重超过90公斤，拥有独特的叶状偶鳍——胸鳍和腹鳍如同四条肉质的"腿"，可以交替划动，仿佛在水中"行走"。这种独特的鳍结构被认为是鱼类向四足动物演化的关键过渡形态。',
+    habitat: '印度洋西部深海洞穴、科摩罗群岛附近150-700米深水域',
+    funFact:
+      '腔棘鱼是"从6600万年前穿越来的旅行者"——科学家曾以为它们与恐龙一同灭绝了！1938年南非渔民意外捕获了一条活腔棘鱼，震惊了整个科学界——被称为"20世纪最伟大的动物学发现"。腔棘鱼的叶状鳍像四条"腿"——可以交替划动，仿佛在水中行走，可能是鱼类向陆地动物演化的关键环节！腔棘鱼的脑容量只占颅腔的1.5%——其余空间被脂肪填充，是"大头小脑"的典型代表。它们寿命可达100年，是鱼类中的"长寿冠军"。',
+    threats: '深海拖网误捕、栖息地破坏、种群繁殖率极低、气候变化',
+    citesStatus: 'CITES 附录I',
+    population: '全球估计不足1,000条',
+    emoji: '🐟',
+    position: { x: 28, y: 60 },
+    lightSize: 34,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_43cb19b7-0231-45dd-8a03-0147b006a464.jpeg?sign=1811261970-0aae0ff2f-0-5a9fb7d6de64bb911a5e10a55b28e39607298be7d4fd606c0ffa8f171f2a5c34',
+  },
+  {
+    id: 'asian-arowana',
+    name: '亚洲龙鱼',
+    latinName: 'Scleropages formosus',
+    category: 'ocean',
+    level: 'EN',
+    levelName: '濒危',
+    description:
+      '亚洲龙鱼是骨舌鱼目骨舌鱼科硬骨舌鱼属的古代淡水鱼，是东南亚热带河流中最珍贵的鱼类之一，也被称为"金龙鱼"。亚洲龙鱼拥有闪亮的金属质感鳞片，在光线下呈现出金色、红色或绿色的光泽，如同水中游动的龙。亚洲龙鱼是真正的"活化石"——其祖先可追溯至3.5亿年前的泥盆纪，身体形态几乎未变。在华人文化中，龙鱼被视为风水吉祥物，象征着财富和好运，顶级血统的金龙鱼在黑市上售价可达数十万美元。',
+    habitat: '东南亚热带河流、沼泽、湖泊、黑水河流域',
+    funFact:
+      '亚洲龙鱼是"水下龙王"——在华人文化中被视为招财吉祥物，顶级金色品种售价可达30万美元！龙鱼是"超级奶爸"——雄性会将受精卵含在口中孵化，直到小鱼能独立生存，这种"口孵"行为可持续60天！龙鱼拥有"第六感"——侧线系统可以感知水中最微弱的振动，精确锁定猎物位置。龙鱼跳跃能力惊人——可以从水面跃起2米抓取树枝上的昆虫和鸟类！它们是世界上最古老的淡水鱼之一——血统可追溯至3.5亿年前，比恐龙还古老。',
+    threats: '非法捕捞（观赏鱼贸易）、栖息地破坏、水污染、黑市高价驱动盗猎',
+    citesStatus: 'CITES 附录I',
+    population: '野生种群持续下降',
+    emoji: '🐉',
+    position: { x: 55, y: 68 },
+    lightSize: 32,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_9d656caf-217a-4687-b010-44a1039eb7ff.jpeg?sign=1811261971-7020e99b63-0-8ca1c1474de9c088a019df034fa55d3d6d659cfdf41c50173b7d06b50bf1ba7a',
+  },
+  {
+    id: 'mantis-shrimp',
+    name: '雀尾螳螂虾',
+    latinName: 'Odontodactylus scyllarus',
+    category: 'ocean',
+    level: 'NT',
+    levelName: '近危',
+    description:
+      '雀尾螳螂虾是口足目齿指虾蛄科的大型甲壳动物，是海洋中最绚丽也最暴力的生物之一。雀尾螳螂虾拥有自然界中最复杂的视觉系统——16种感光细胞（人类仅3种），可以看到紫外线、偏振光和多达12种原色。它的身体如同一块流动的宝石，红、蓝、绿、金多种色彩交织，被BBC称为"海洋中最美的杀手"。雀尾螳螂虾的攻击速度堪称动物界最快——锤肢弹出速度达80公里/小时，加速度超过.22口径手枪子弹，瞬间产生水中空化气泡，冲击波足以击碎水族箱的强化玻璃。',
+    habitat: '印度洋-太平洋热带珊瑚礁、海底碎石区、沙质海床',
+    funFact:
+      '雀尾螳螂虾拥有16种感光细胞——人类仅3种，它们看到的世界比任何动物都更丰富多彩！螳螂虾的拳头速度达80公里/小时——加速度超过子弹，冲击波足以击碎水族箱玻璃！它们的拳脚力量如此之大，以至于出拳时会使周围的水瞬间沸腾（空化效应），产生闪光和高温。螳螂虾可以看到紫外线和偏振光——这种能力被科学家用于研发新型光学传感器。它们是"恋爱专家"——部分种类终生一夫一妻，夫妻会通过荧光信号"聊天"。',
+    threats: '珊瑚礁退化、海洋酸化、水污染、栖息地破坏',
+    citesStatus: '未列入CITES附录',
+    population: '种群数量尚可，但栖息地快速退化',
+    emoji: '🦐',
+    position: { x: 70, y: 75 },
+    lightSize: 26,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_8ab15231-ac94-4d24-824d-0cad3bc5bd53.jpeg?sign=1811261997-cd2ace2d57-0-6e6ff66ca0c0dc0979d32c9fee9fa6d072abfb7d0abd68a63789d14adfb34d1',
+  },
+  {
+    id: 'leatherback-turtle',
+    name: '棱皮龟',
+    latinName: 'Dermochelys coriacea',
+    category: 'ocean',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '棱皮龟是龟鳖目棱皮龟科棱皮龟属的海洋爬行动物，是现存最大的龟类——体长可达2.5米，体重超过700公斤，也是潜水最深的爬行动物——可潜入1200米的深海。棱皮龟最独特的特征是没有硬壳——背甲由厚实的革质皮肤覆盖，上面有7条纵行棱脊，像一艘黑色的潜水艇。棱皮龟以水母为主食，每天可吃掉相当于自身体重73%的水母。然而，海中漂浮的塑料袋与水母极为相似，棱皮龟误食塑料后常因肠道堵塞而死亡——这是它们面临的最大威胁之一。',
+    habitat: '全球热带、亚热带和温带海洋，迁徙距离可达16,000公里',
+    funFact:
+      '棱皮龟是"深海潜水冠军"——可以潜入1,200米的深海，比大多数鲸鱼潜得还深！棱皮龟没有硬壳——背甲是革质皮肤，像一艘柔软的"潜水艇"，可以在深水高压下不被压碎。棱皮龟每年迁徙16,000公里——从热带产卵海滩游到北极海域觅食，比任何其他爬行动物都远！棱皮龟专吃水母——但塑料袋与水母极其相似，误食后会导致肠道堵塞死亡。棱皮龟的体温调节系统在爬行动物中独一无二——它们是"温血爬行动物"，能在冰冷的海水中保持25℃的体温！',
+    threats: '海洋塑料污染（误食塑料袋）、非法盗取龟蛋、渔业误捕、栖息地海滩开发',
+    citesStatus: 'CITES 附录I',
+    population: '全球约34,000只繁殖雌龟（过去30年下降超过70%）',
+    emoji: '🐢',
+    position: { x: 18, y: 50 },
+    lightSize: 38,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_adc0eaf0-96ef-47cf-82de-1f6f4208046b.jpeg?sign=1811261999-57bac7fe25-0-0333994f6e703a28fde69dac24dba2b62ec8f67d504f316685eb30484ff8bb39',
   },
 ];
 

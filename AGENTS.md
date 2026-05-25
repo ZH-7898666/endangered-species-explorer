@@ -29,7 +29,7 @@
 │   │   ├── species-card.tsx    # 物种科普卡片弹窗（档案/影像双标签页）
 │   │   └── ui/                 # shadcn/ui 组件库
 │   ├── data/
-│   │   └── species.ts          # 34种濒危物种数据（森林15种 + 海洋19种）
+│   │   └── species.ts          # 51种濒危物种数据（森林26种 + 海洋25种）
 │   ├── hooks/
 │   └── lib/
 ├── DESIGN.md                   # 设计规范（色彩、字体、动效、交互规范）
@@ -53,7 +53,7 @@
 | 森林场景 | `src/components/forest-scene.tsx` | 山林剪影、雾气Canvas、光斑漂浮、落叶、萤火虫 |
 | 海洋场景 | `src/components/ocean-scene.tsx` | 海底地形、焦散Canvas、气泡、鱼影、涟漪 |
 | 物种卡片 | `src/components/species-card.tsx` | 磨砂玻璃卡片、档案/影像标签页、保护等级条 |
-| 物种数据 | `src/data/species.ts` | 28种濒危物种完整数据（森林15+海洋13）含AI生成图片URL |
+| 物种数据 | `src/data/species.ts` | 51种濒危物种完整数据（森林26+海洋25）含AI生成图片URL |
 | 动画定义 | `src/app/globals.css` | 光斑/气泡漂浮、雾气漂移、落叶、涟漪等关键帧 |
 | 设计规范 | `DESIGN.md` | 色彩体系、动效规范、交互逻辑、设计禁忌 |
 
