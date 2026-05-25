@@ -3,7 +3,7 @@ export interface Species {
   name: string;
   latinName: string;
   category: 'forest' | 'ocean';
-  level: 'CR' | 'EN' | 'VU';
+  level: 'CR' | 'EN' | 'VU' | 'NT';
   levelName: string;
   description: string;
   habitat: string;
@@ -587,6 +587,132 @@ export const oceanSpecies: Species[] = [
     lightSize: 38,
     imageUrl:
       'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_3ab01f7d-efbd-42e4-bf7c-22a8743a6223.jpeg?sign=1811251618-a4d7ab479b-0-bc7f210acf77866cbe7a3a0309b1d7b6661e5790e658a1ae692278d4e3e1a507',
+  },
+  {
+    id: 'leafy-seadragon',
+    name: '叶海龙',
+    latinName: 'Phycodurus eques',
+    category: 'ocean',
+    level: 'NT',
+    levelName: '近危',
+    description:
+      '叶海龙是海龙科海龙属的海洋鱼类，是南澳大利亚的海洋标志动物。叶海龙身上长满了像海藻叶子一样的附属物，这些"叶子"完全是装饰——不像真海藻那样能进行光合作用，但让叶海龙完美融入海带丛中，堪称海洋界的伪装大师。叶海龙与海马是近亲，同样由雄性怀孕生子——雌性将卵产在雄性尾部的育儿囊中，由雄性孵化约8周后生产。',
+    habitat: '澳大利亚南部沿海海带森林、岩石礁区、海草床',
+    funFact:
+      '叶海龙是世界上最慢的游泳者之一——它的小鳍几乎透明，每秒只振动几次，移动速度约每小时150米，比蜗牛还慢！但正是这种"慢"成就了它的伪装策略——在水流中它就像一片漂浮的海藻。叶海龙是南澳大利亚的海洋标志，出现在当地的车牌上。它那华丽的叶状附肢一旦被咬掉就无法再生，所以伪装是它唯一的防御——一旦暴露就无处可逃。',
+    threats: '非法采集（水族贸易）、栖息地退化（海带森林减少）、海洋变暖',
+    citesStatus: 'CITES 附录II',
+    population: '数量难以估计，因伪装极好不易调查',
+    emoji: '🐉',
+    position: { x: 25, y: 72 },
+    lightSize: 30,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_56de1c6f-a719-4f8c-a516-776587fa6657.jpeg?sign=1811254698-8eb79e403d-0-c3b1d2880b8ef52fe4b16421e21fb09ae317a0b71035dd04c5bd10fd5103778b',
+  },
+  {
+    id: 'napoleon-wrasse',
+    name: '苏眉鱼',
+    latinName: 'Cheilinus undulatus',
+    category: 'ocean',
+    level: 'EN',
+    levelName: '濒危',
+    description:
+      '苏眉鱼是隆头鱼科唇鱼属的大型珊瑚礁鱼类，是世界上最大的珊瑚礁鱼类之一，成鱼体长可达2米以上，体重可达190公斤。苏眉鱼最显著的特征是额头高高隆起的"拿破仑帽"，因此英文名叫Napoleon wrasse。它们是珊瑚礁生态系统的顶级捕食者之一，以有毒的棘冠海星为食——是少数能控制这种珊瑚杀手的天然力量。',
+    habitat: '印度-太平洋热带珊瑚礁、潟湖、外礁斜坡',
+    funFact:
+      '苏眉鱼是珊瑚礁的"医生"——它们会定期前往"清洁站"，让清洁鱼和清洁虾帮它们清除寄生虫。苏眉鱼是性转换大师——所有个体出生时都是雌性，长到一定年龄后最大的雌鱼会变性为雄性！苏眉鱼极其聪明，能认出常喂它的潜水员并主动靠近互动，被潜水员称为"海中狗狗"。在一些东南亚国家，食用苏眉鱼是地位的象征，一条可售数万元，这恰恰加速了它们的灭亡。',
+    threats: '过度捕捞（高档海鲜消费）、活鱼贸易、栖息地退化（珊瑚礁破坏）',
+    citesStatus: 'CITES 附录II',
+    population: '过去30年减少超过50%',
+    emoji: '🐟',
+    position: { x: 40, y: 68 },
+    lightSize: 36,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_3a0b02d6-2341-4fc9-ab63-927b79956994.jpeg?sign=1811254699-cbd34bb454-0-7d11d3041c542b7e4adb2b996d75ee959b182a27e846038eab53379122188164',
+  },
+  {
+    id: 'giant-octopus',
+    name: '北太平洋巨型章鱼',
+    latinName: 'Enteroctopus dofleini',
+    category: 'ocean',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '北太平洋巨型章鱼是章鱼科肠章鱼属的海洋软体动物，是世界上体型最大的章鱼物种，臂展可达6米以上，体重可达50公斤。巨型章鱼拥有3颗心脏、9个大脑（1个中央大脑+8个触手各1个迷你脑）和蓝色血液（含铜的血蓝蛋白代替含铁的血红蛋白）。它们是无脊椎动物中智力最高的物种，能开瓶盖、走迷宫、模仿其他动物，甚至学会观察模仿同类行为。',
+    habitat: '北太平洋沿岸、从潮间带到水深200米的岩石礁区',
+    funFact:
+      '巨型章鱼的每个吸盘上有数千个化学感受器——相当于2亿个味蕾（人类只有1万个），它们用触手"品尝"一切触碰的东西。巨型章鱼妈妈是自然界最极致的牺牲者——产卵后6个月内寸步不离守护卵，不进食不离开，直到卵孵化后自己走向死亡。章鱼的心跳和呼吸频率会随情绪变化——紧张时心跳可以从每分钟40次飙升至140次。它们还能编辑自己的RNA来适应环境温度变化，这在动物界极其罕见。',
+    threats: '海洋温度升高、栖息地退化、过度捕捞、海洋酸化',
+    citesStatus: 'CITES 附录II',
+    population: '因寿命短（3-5年）难以精确统计，部分地区数量下降',
+    emoji: '🐙',
+    position: { x: 85, y: 72 },
+    lightSize: 34,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_090eef82-678f-4bd7-ae74-fd06efe40516.jpeg?sign=1811254697-c51d4861e7-0-0ee6ce6af39e497ec886e3d8a5ea92de7c86a69ca14d53a385b7347625f4002c',
+  },
+  {
+    id: 'ocean-sunfish',
+    name: '翻车鱼',
+    latinName: 'Mola mola',
+    category: 'ocean',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '翻车鱼是翻车鲀科翻车鲀属的海洋鱼类，是世界上最重的硬骨鱼，成年个体体重可达1000-2300公斤。翻车鱼外形奇特——像一个被剪掉后半身的大鱼头，尾鳍退化成波浪形的"伪尾"。翻车鱼是海洋中的"太阳崇拜者"——它们经常侧翻身体漂浮在海面上晒太阳，这个行为被称为"晒日光浴"，可能是为了给体表的寄生虫"消毒"或帮助消化。',
+    habitat: '全球温带和热带海域、远洋开放水域、偶尔靠近沿海',
+    funFact:
+      '翻车鱼是产卵冠军——一次可产3亿颗卵，是已知脊椎动物中产卵量最大的！但成活率极低，从3亿颗卵中只有约2条能长大成年。翻车鱼的皮肤是海洋中最厚的——厚达7.5厘米，上面长满了超过40种寄生虫，以至于它们会请海鸥"做SPA"——浮出海面让海鸥啄食寄生虫。翻车鱼游泳技术很差，主要靠背鳍和臀鳍像桨一样交替划水，速度只有每小时3公里，是海洋中最慢的大型鱼类之一。',
+    threats: '误捕（延绳钓和拖网渔业兼捕）、海洋塑料污染（误食塑料袋）、栖息地退化',
+    citesStatus: 'CITES 附录II',
+    population: '全球数量难以估计，部分地区明显下降',
+    emoji: '🌕',
+    position: { x: 55, y: 55 },
+    lightSize: 40,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_e5ff958a-1ea7-4ad0-aea3-af9a7739ba07.jpeg?sign=1811254720-6f537a3b44-0-f5f0dcfc253a9df67730e3662821a285cc3034ea29b1084228a87fdee3483fb5',
+  },
+  {
+    id: 'coral-reef',
+    name: '珊瑚礁生态系统',
+    latinName: 'Scleractinia spp.',
+    category: 'ocean',
+    level: 'VU',
+    levelName: '易危',
+    description:
+      '珊瑚礁是地球上生物多样性最高的生态系统之一——虽然仅占海洋面积的0.1%，却养育了25%以上的海洋物种。珊瑚本身是动物——它们是刺胞动物门珊瑚虫纲的生物，与水母、海葵是近亲。造礁珊瑚与体内的虫黄藻形成共生关系——虫黄藻通过光合作用为珊瑚提供90%以上的能量，同时赋予珊瑚斑斓的色彩。全球已知的造礁珊瑚超过800种，其中多种被列入CITES附录II。',
+    habitat: '热带和亚热带浅海、水深不超过50米的清澈温暖水域',
+    funFact:
+      '大堡礁是地球上最大的生物结构——从太空中肉眼可见，面积比意大利还大！珊瑚礁是海洋的"热带雨林"——每平方米的物种数量甚至超过热带雨林。珊瑚的繁殖方式极其浪漫——每年同一个夜晚，整个大堡礁的珊瑚会同步释放卵子和精子，海水中飘满粉红色的"珊瑚雪"，这个现象被称为"珊瑚产卵"。珊瑚礁每年为全球经济贡献约3750亿美元（渔业、旅游、海岸保护），却正在以人类历史上前所未有的速度消失。',
+    threats: '海水温度升高导致白化、海洋酸化、过度捕捞、污染、破坏性渔业',
+    citesStatus: 'CITES 附录II（所有石珊瑚目物种）',
+    population: '全球珊瑚礁在过去30年减少了50%以上',
+    emoji: '🪸',
+    position: { x: 15, y: 82 },
+    lightSize: 32,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_5c4d82ba-4eb5-4184-92e1-b640dbebc538.jpeg?sign=1811254721-aa3da04f2b-0-adb123f0f0823de9f911147e3dbc852ff5c79779a3bdfb263ee89cde72969348',
+  },
+  {
+    id: 'vaquita',
+    name: '小头鼠海豚',
+    latinName: 'Phocoena sinus',
+    category: 'ocean',
+    level: 'CR',
+    levelName: '极危',
+    description:
+      '小头鼠海豚是鼠海豚科鼠海豚属的海洋哺乳动物，是世界上最稀有的鲸类动物，也是最濒危的海洋哺乳动物。小头鼠海豚仅分布在墨西哥加利福尼亚湾北部，体长仅约1.5米，体重约50公斤，是体型最小的鼠海豚。它们有着标志性的黑色眼圈，看起来像戴了一副"眼镜"，加上嘴角微微上翘，给人一种永远在微笑的可爱印象——但这份微笑正在消逝。',
+    habitat: '墨西哥加利福尼亚湾北部浅水区',
+    funFact:
+      '小头鼠海豚可能是下一个灭绝的大型动物——2024年的估计仅剩不到10只！它们是海洋中的"隐士"——极其害羞，会主动躲避船只和人类，几乎从不跃出水面，很难被观察到。小头鼠海豚不是渔民的猎物——它们是被非法捕捞另一种濒危鱼类（石首鱼）的刺网"误杀"的。石首鱼的鱼鳔在中国黑市上可售数十万元（被称为"金钱鳘"），这种荒诞的贸易同时杀死了两个物种。科学家曾试图将小头鼠海豚迁往保护区，但第一次捕获尝试就导致一只死亡，项目被迫终止。',
+    threats: '非法刺网误捕（石首鱼贸易附带伤害）、栖息地狭窄',
+    citesStatus: 'CITES 附录I',
+    population: '全球不足10只（2024年估计）',
+    emoji: '🐬',
+    position: { x: 75, y: 45 },
+    lightSize: 36,
+    imageUrl:
+      'https://coze-coding-project.tos.coze.site/coze_storage_7642337887874285568/image/generate_image_d4e15846-e89b-40cf-b1d7-ae583559b8fa.jpeg?sign=1811254721-f3026cc9e6-0-042a1d1f135b0a852de1d2372464da8f854b0f54edf8b5b015abb12f35a701f6',
   },
 ];
 

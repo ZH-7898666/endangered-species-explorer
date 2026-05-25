@@ -1,207 +1,184 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { forestSpecies, oceanSpecies } from '@/data/species';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Species } from '@/data/species';
 import { ForestScene } from '@/components/forest-scene';
 import OceanScene from '@/components/ocean-scene';
 import { SpeciesCard } from '@/components/species-card';
+import { forestSpecies, oceanSpecies } from '@/data/species';
 
-type SceneType = 'forest' | 'ocean';
+// World is 2x the viewport size - elements are spread across this larger space
+const WORLD_SCALE = 2.0;
 
 export default function Home() {
-  const [currentScene, setCurrentScene] = useState<SceneType>('forest');
-  const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
+  const [currentScene, setCurrentScene] = useState<'forest' | 'ocean'>('forest');
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isCardClosing, setIsCardClosing] = useState(false);
-  const [isCardOpen, setIsCardOpen] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const isDragging = useRef(false);
-  const dragStart = useRef({ x: 0, y: 0 });
+  const [recentlyClicked, setRecentlyClicked] = useState<Set<string>>(new Set());
+  const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [burstingId, setBurstingId] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Viewport camera: zoom and pan within the larger world
+  const [zoom, setZoom] = useState(1.0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
+  const panOrigin = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mouse position for parallax effect (normalized -1 to 1)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const mousePosRef = useRef({ x: 0, y: 0 });
+  useEffect(() => { setIsMounted(true); }, []);
 
-  // Track recently clicked species for 5s restore effect
-  const [recentlyClicked, setRecentlyClicked] = useState<Set<string>>(new Set());
-
-  // Bursting bubble id for pop animation
-  const [burstingId, setBurstingId] = useState<string | null>(null);
-
-  const currentSpeciesList = currentScene === 'forest' ? forestSpecies : oceanSpecies;
-  const unlockedCount = currentSpeciesList.filter((s) => unlockedIds.has(s.id)).length;
-  const totalCount = currentSpeciesList.length;
-
-  // Track mouse movement for parallax
+  // Mouse position for parallax (normalized -1 to 1)
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-      mousePosRef.current = { x: nx, y: ny };
-      setMousePos({ x: nx, y: ny });
+    const handleMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMove);
+    return () => window.removeEventListener('mousemove', handleMove);
   }, []);
 
-  // Handle species click
-  const handleSpeciesClick = useCallback(
-    (species: Species) => {
-      if (isCardOpen) return;
-      setUnlockedIds((prev) => new Set([...prev, species.id]));
+  // Auto-restore recently clicked items after 5 seconds
+  useEffect(() => {
+    if (recentlyClicked.size === 0) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    recentlyClicked.forEach(id => {
+      timers.push(setTimeout(() => {
+        setRecentlyClicked(prev => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }, 5000));
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [recentlyClicked]);
 
-      // If ocean scene, trigger bubble burst animation first
-      if (currentScene === 'ocean') {
-        setBurstingId(species.id);
-        // After burst animation (400ms), show the card
-        setTimeout(() => {
-          setBurstingId(null);
-          setSelectedSpecies(species);
-          setIsCardOpen(true);
-          setIsCardClosing(false);
-          setRecentlyClicked((prev) => new Set([...prev, species.id]));
-        }, 400);
-      } else {
-        // Forest scene — show card immediately with light spot dim
-        setSelectedSpecies(species);
-        setIsCardOpen(true);
-        setIsCardClosing(false);
-        setRecentlyClicked((prev) => new Set([...prev, species.id]));
-      }
-    },
-    [isCardOpen, currentScene]
-  );
+  const handleSpeciesClick = useCallback((species: Species) => {
+    setBurstingId(species.id);
+    setUnlockedIds(prev => new Set(prev).add(species.id));
+    setRecentlyClicked(prev => new Set(prev).add(species.id));
+
+    setTimeout(() => setBurstingId(null), 600);
+    setTimeout(() => {
+      setSelectedSpecies(species);
+      setIsClosing(false);
+    }, 350);
+  }, []);
 
   const handleCloseCard = useCallback(() => {
-    setIsCardClosing(true);
+    setIsClosing(true);
     setTimeout(() => {
-      setIsCardOpen(false);
-      setIsCardClosing(false);
       setSelectedSpecies(null);
+      setIsClosing(false);
     }, 300);
   }, []);
 
-  // Auto-restore recently clicked species after 5 seconds
-  useEffect(() => {
-    if (recentlyClicked.size === 0) return;
-    const timer = setTimeout(() => {
-      setRecentlyClicked(new Set());
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [recentlyClicked]);
-
-  const switchScene = useCallback(
-    (target: SceneType) => {
-      if (target === currentScene || isTransitioning) return;
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentScene(target);
-        setZoom(1);
-        setPanOffset({ x: 0, y: 0 });
-        setTimeout(() => setIsTransitioning(false), 800);
-      }, 400);
-    },
-    [currentScene, isTransitioning]
-  );
-
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      e.preventDefault();
-      setZoom((prev) => {
-        const delta = e.deltaY > 0 ? -0.08 : 0.08;
-        return Math.min(Math.max(prev + delta, 0.6), 2.5);
-      });
-    },
-    []
-  );
+  // Zoom: adjust camera distance within the world
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    setZoom(prev => {
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      const next = Math.min(2.5, Math.max(0.5, prev + delta));
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (zoom <= 1) return;
-      isDragging.current = true;
-      dragStart.current = { x: e.clientX, y: e.clientY };
-      panStart.current = { ...panOffset };
-    },
-    [zoom, panOffset]
-  );
+  // Pan: move viewport within the world (middle-click or ctrl+drag)
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+      e.preventDefault();
+      isPanning.current = true;
+      panStart.current = { x: e.clientX, y: e.clientY };
+      panOrigin.current = { ...pan };
+    }
+  }, [pan]);
 
-  const handleContainerMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging.current) return;
-      const dx = e.clientX - dragStart.current.x;
-      const dy = e.clientY - dragStart.current.y;
-      setPanOffset({
-        x: panStart.current.x + dx,
-        y: panStart.current.y + dy,
-      });
-    },
-    []
-  );
+  const handleMouseMovePan = useCallback((e: React.MouseEvent) => {
+    if (!isPanning.current) return;
+    const dx = e.clientX - panStart.current.x;
+    const dy = e.clientY - panStart.current.y;
+    const scale = 1 / zoom;
+    setPan({
+      x: panOrigin.current.x + dx * scale,
+      y: panOrigin.current.y + dy * scale,
+    });
+  }, [zoom]);
 
   const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
+    isPanning.current = false;
   }, []);
+
+  // Constrain pan so viewport stays within world bounds
+  const constrainPan = useCallback((p: { x: number; y: number }, z: number) => {
+    // The visible world area is viewport / zoom
+    // The world size is WORLD_SCALE * viewport
+    // Pan offset is relative to center of world
+    const maxPanX = (WORLD_SCALE - 1 / z) * 50; // percentage
+    const maxPanY = (WORLD_SCALE - 1 / z) * 50;
+    return {
+      x: Math.max(-maxPanX, Math.min(maxPanX, p.x)),
+      y: Math.max(-maxPanY, Math.min(maxPanY, p.y)),
+    };
+  }, []);
+
+  const constrainedPan = constrainPan(pan, zoom);
+
+  const currentSpecies = currentScene === 'forest' ? forestSpecies : oceanSpecies;
+  const sceneLabel = currentScene === 'forest' ? '秘境森林' : '深海海域';
+  const sceneDesc = currentScene === 'forest'
+    ? '黄昏密林，萤火闪烁'
+    : '深海秘境，荧光摇曳';
+
+  if (!isMounted) {
+    return <div className="w-screen h-screen bg-black" />;
+  }
 
   return (
     <div
+      className="relative w-screen h-screen overflow-hidden"
+      style={{ cursor: isPanning.current ? 'grabbing' : 'default' }}
       ref={containerRef}
-      className="fixed inset-0 overflow-hidden cursor-grab active:cursor-grabbing select-none"
       onMouseDown={handleMouseDown}
-      onMouseMove={handleContainerMouseMove}
+      onMouseMove={handleMouseMovePan}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* ==========================================
-          SCENE WORLD — zoom & pan only apply here
-          ========================================== */}
+      {/* Scene container - this is the "world" that we navigate through */}
       <div
-        className="absolute inset-0"
+        className="absolute"
         style={{
-          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+          // World is larger than viewport
+          width: `${WORLD_SCALE * 100}%`,
+          height: `${WORLD_SCALE * 100}%`,
+          // Position so center of world aligns with center of viewport at zoom=1
+          left: `${-(WORLD_SCALE - 1) * 50}%`,
+          top: `${-(WORLD_SCALE - 1) * 50}%`,
+          // Camera transform: zoom + pan
+          transform: `scale(${zoom}) translate(${constrainedPan.x}%, ${constrainedPan.y}%)`,
           transformOrigin: 'center center',
-          transition: 'transform 0.15s ease-out',
+          transition: isPanning.current ? 'none' : 'transform 0.15s ease-out',
         }}
       >
-        {/* Forest Scene */}
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: currentScene === 'forest' ? (isTransitioning ? 0 : 1) : 0,
-            transition: isTransitioning ? 'opacity 0.4s ease' : 'opacity 0.8s ease',
-            pointerEvents: currentScene === 'forest' ? 'auto' : 'none',
-          }}
-        >
+        {currentScene === 'forest' ? (
           <ForestScene
             species={forestSpecies}
             unlockedIds={unlockedIds}
             recentlyClicked={recentlyClicked}
             onSpeciesClick={handleSpeciesClick}
-            isVisible={currentScene === 'forest' && !isTransitioning}
+            isVisible={true}
             mousePos={mousePos}
           />
-        </div>
-
-        {/* Ocean Scene */}
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: currentScene === 'ocean' ? (isTransitioning ? 0 : 1) : 0,
-            transition: isTransitioning ? 'opacity 0.4s ease' : 'opacity 0.8s ease',
-            pointerEvents: currentScene === 'ocean' ? 'auto' : 'none',
-          }}
-        >
+        ) : (
           <OceanScene
             species={oceanSpecies}
             unlockedIds={unlockedIds}
@@ -210,96 +187,65 @@ export default function Home() {
             mousePos={mousePos}
             burstingId={burstingId}
           />
-        </div>
-      </div>
-
-      {/* ==========================================
-          UI OVERLAY — never affected by zoom/pan
-          ========================================== */}
-      <div className="fixed inset-0 pointer-events-none z-50">
-        {/* Top Center - Unlock Counter */}
-        <div className="absolute top-6 left-1/2 -translate-x-1/2">
-          <div
-            className={`
-              px-5 py-2.5 rounded-full
-              backdrop-blur-xl border border-white/10
-              ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.6)]' : 'bg-[rgba(10,22,40,0.6)]'}
-              text-white/80 text-sm tracking-wider font-light
-            `}
-          >
-            <span className="text-white/50">已发现</span>{' '}
-            <span className="font-medium text-white/90">{unlockedCount}</span>
-            <span className="text-white/50"> / {totalCount}</span>
-          </div>
-        </div>
-
-        {/* Bottom Left - Scene Info */}
-        <div className="absolute bottom-8 left-8">
-          <h2
-            className={`text-2xl font-light tracking-wide mb-1.5 ${
-              currentScene === 'forest' ? 'text-[#C8D890]' : 'text-[#B8D8E8]'
-            }`}
-          >
-            {currentScene === 'forest' ? '秘境森林' : '深海海域'}
-          </h2>
-          <p className="text-white/40 text-sm font-light max-w-64 leading-relaxed">
-            {currentScene === 'forest'
-              ? '暮色中的密林，荧光光斑中隐藏着珍稀生灵'
-              : '幽蓝深海，气泡里封存着来自深渊的秘密'}
-          </p>
-          <p className="text-white/25 text-xs mt-2 font-light">
-            滚轮缩放 · 点击探索 · 拖拽平移
-          </p>
-        </div>
-
-        {/* Bottom Right - Scene Switch */}
-        <div className="absolute bottom-8 right-8 flex flex-col gap-3 pointer-events-auto">
-          <button
-            onClick={() => switchScene('forest')}
-            className={`
-              scene-switch-btn px-5 py-3 rounded-2xl
-              border text-sm font-light tracking-wide
-              ${currentScene === 'forest'
-                ? 'bg-[rgba(232,200,64,0.12)] border-[rgba(232,200,64,0.25)] text-[#E8C840]'
-                : 'bg-[rgba(30,40,28,0.4)] border-white/10 text-white/50 hover:text-white/70'
-              }
-            `}
-          >
-            🌿 秘境森林
-          </button>
-          <button
-            onClick={() => switchScene('ocean')}
-            className={`
-              scene-switch-btn px-5 py-3 rounded-2xl
-              border text-sm font-light tracking-wide
-              ${currentScene === 'ocean'
-                ? 'bg-[rgba(140,180,220,0.12)] border-[rgba(140,180,220,0.25)] text-[#B8D8E8]'
-                : 'bg-[rgba(10,22,40,0.4)] border-white/10 text-white/50 hover:text-white/70'
-              }
-            `}
-          >
-            🌊 深海海域
-          </button>
-        </div>
-
-        {/* Zoom indicator */}
-        {zoom !== 1 && (
-          <div className="absolute top-6 right-8">
-            <div
-              className={`
-                px-3 py-1.5 rounded-full text-xs text-white/50
-                backdrop-blur-xl border border-white/10
-                ${currentScene === 'forest' ? 'bg-[rgba(30,40,28,0.6)]' : 'bg-[rgba(10,22,40,0.6)]'}
-              `}
-            >
-              {Math.round(zoom * 100)}%
-            </div>
-          </div>
         )}
       </div>
 
-      {/* Species Card Modal */}
-      {isCardOpen && selectedSpecies && (
+      {/* UI Overlay - fixed on screen, not affected by zoom/pan */}
+      {/* Scene name & description */}
+      <div className="absolute bottom-8 left-8 z-50 select-none">
+        <h2 className="text-white/70 text-lg font-medium tracking-wider" style={{ fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif" }}>
+          {sceneLabel}
+        </h2>
+        <p className="text-white/30 text-xs mt-1 tracking-widest">
+          {sceneDesc}
+        </p>
+        <p className="text-white/20 text-[10px] mt-2 tracking-wide">
+          滚轮缩放 · Ctrl+拖拽平移 · 点击探索
+        </p>
+      </div>
+
+      {/* Species counter */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 select-none">
+        <div
+          className="px-5 py-2 rounded-full flex items-center gap-2"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <span className="text-white/50 text-xs tracking-wider">已发现</span>
+          <span className="text-white/90 text-sm font-medium">
+            {unlockedIds.size}/{currentSpecies.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Scene switch button */}
+      <div className="absolute bottom-8 right-8 z-50">
+        <button
+          onClick={() => setCurrentScene(prev => prev === 'forest' ? 'ocean' : 'forest')}
+          className="px-5 py-2.5 rounded-full text-white/80 text-sm tracking-wider transition-all duration-300 hover:scale-105 active:scale-95"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif",
+          }}
+        >
+          {currentScene === 'forest' ? '🌊 深海海域' : '🌿 秘境森林'}
+        </button>
+      </div>
+
+      {/* Zoom indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 select-none">
+        <span className="text-white/15 text-[10px] tracking-wider">
+          {Math.round(zoom * 100)}%
+        </span>
+      </div>
+
+      {/* Species card modal */}
+      {selectedSpecies && (
         <SpeciesCard
           species={selectedSpecies}
           onClose={handleCloseCard}
