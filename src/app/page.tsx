@@ -61,7 +61,8 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMove);
   }, []);
 
-  // Auto-restore recently clicked items after 5 seconds
+  // Auto-restore recently clicked items after 6 seconds
+  // (must be shorter than the component's re-emerge delay of 8-12s)
   useEffect(() => {
     if (recentlyClicked.size === 0) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -72,7 +73,7 @@ export default function Home() {
           next.delete(id);
           return next;
         });
-      }, 5000));
+      }, 6000));
     });
     return () => timers.forEach(clearTimeout);
   }, [recentlyClicked]);

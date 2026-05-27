@@ -26,6 +26,7 @@ interface BubbleState {
   species: Species;
   x: number;
   y: number;
+  targetY: number;  // final resting Y position
   size: number;
   scale: number;
   opacity: number;
@@ -37,6 +38,9 @@ interface BubbleState {
   parallaxFactor: number;
   active: boolean;
   respawnTimer: number | null;
+  emerged: boolean;    // whether bubble has finished rising to targetY
+  emergeDelay: number; // seconds before starting to rise
+  emerging: boolean;   // currently rising from bottom
 }
 
 function BubbleBurst({ x, y, color }: { x: number; y: number; color: string }) {
@@ -183,37 +187,65 @@ export default function OceanScene({
       breathDelay: Math.random() * -4,
     })), []);
 
-  // ====== BUBBLE SYSTEM (same as before) ======
+  // ====== BUBBLE SYSTEM (progressive emergence from bottom) ======
   const colorKeys = useMemo(() => Object.keys(BUBBLE_COLORS) as BubbleColorKey[], []);
+  const mountTimeRef = useRef<number>(0);
+  const hiddenTimersRef = useRef<Record<number, number>>({});
 
   useEffect(() => {
+    mountTimeRef.current = Date.now();
+    const targetYs = species.map((_, i) => 10 + ((i * 29 + 7) % 70)); // deterministic target positions
     const initial: BubbleState[] = species.map((sp, i) => ({
       id: i,
       species: sp,
-      x: 8 + Math.random() * 84,
-      y: 10 + Math.random() * 70,
+      x: 8 + ((i * 37 + 13) % 84),
+      y: 110 + Math.random() * 20,  // start below screen
+      targetY: targetYs[i],
       size: 18 + Math.random() * 16,
       scale: 1,
-      opacity: 1,
+      opacity: 0,  // invisible until emergence starts
       color: colorKeys[Math.floor(Math.random() * colorKeys.length)],
       emoji: sp.emoji || '🐠',
       wobbleAmp: 4 + Math.random() * 8,
-      riseSpeed: 0.02 + Math.random() * 0.03,
+      riseSpeed: 0.15 + Math.random() * 0.1,  // rise speed (faster than drift)
       breathDuration: 4 + Math.random() * 2,
       parallaxFactor: 0.05 + Math.random() * 0.15,
-      active: true,
+      active: false,
       respawnTimer: null,
+      emerged: false,
+      emergeDelay: 1 + i * 0.3 + Math.random() * 2,  // stagger: 1s ~ 20s
+      emerging: false,
     }));
     bubblesRef.current = initial;
     setBubbles(initial);
   }, [species, colorKeys]);
 
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(hiddenTimersRef.current).forEach(clearTimeout);
+    };
+  }, []);
+
   useEffect(() => {
     if (bubblesRef.current.length === 0) return;
     const interval = setInterval(() => {
+      const elapsed = (Date.now() - mountTimeRef.current) / 1000;
       bubblesRef.current = bubblesRef.current.map(b => {
+        // Emergence phase: bubble rises from bottom to targetY
+        if (!b.emerged && !b.emerging && elapsed >= b.emergeDelay) {
+          return { ...b, emerging: true, active: true, opacity: 0.8 };
+        }
+        if (b.emerging && !b.emerged) {
+          const newY = b.y - b.riseSpeed * 3; // rise faster during emergence
+          if (newY <= b.targetY) {
+            return { ...b, y: b.targetY, emerged: true, emerging: false, opacity: 1 };
+          }
+          return { ...b, y: newY };
+        }
+        // Normal drift phase (emerged bubbles)
         if (!b.active) return b;
-        const newY = b.y - b.riseSpeed;
+        const newY = b.y - b.riseSpeed * 0.3;  // very slow normal drift
         if (newY < -8) {
           return { ...b, y: 105, x: 8 + Math.random() * 84 };
         }
@@ -228,30 +260,30 @@ export default function OceanScene({
     setBurstPositions(prev => ({ ...prev, [bubble.species.id]: { x: bubble.x, y: bubble.y } }));
     onSpeciesClick(bubble.species);
 
+    // Hide the bubble (burst effect)
     setBubbles(prev => prev.map(b =>
-      b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, respawnTimer: 5 } : b
+      b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, emerged: false, emerging: false, respawnTimer: 0 } : b
     ));
     bubblesRef.current = bubblesRef.current.map(b =>
-      b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, respawnTimer: 5 } : b
+      b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, emerged: false, emerging: false, respawnTimer: 0 } : b
     );
 
-    setTimeout(() => {
+    // After 8-12 seconds, re-emerge from bottom
+    const reemergeDelay = 8000 + Math.random() * 4000;
+    if (hiddenTimersRef.current[bubble.id]) {
+      clearTimeout(hiddenTimersRef.current[bubble.id]);
+    }
+    hiddenTimersRef.current[bubble.id] = window.setTimeout(() => {
+      const newY = 110 + Math.random() * 20;
+      const newTargetY = 10 + Math.random() * 70;
+      const newX = 8 + Math.random() * 84;
       setBubbles(prev => prev.map(b =>
-        b.id === bubble.id ? { ...b, scale: 1, opacity: 0.35, active: true, respawnTimer: null } : b
+        b.id === bubble.id ? { ...b, y: newY, targetY: newTargetY, x: newX, scale: 1, opacity: 0.8, active: true, emerging: true, emerged: false, respawnTimer: null } : b
       ));
       bubblesRef.current = bubblesRef.current.map(b =>
-        b.id === bubble.id ? { ...b, scale: 1, opacity: 0.35, active: true, respawnTimer: null } : b
+        b.id === bubble.id ? { ...b, y: newY, targetY: newTargetY, x: newX, scale: 1, opacity: 0.8, active: true, emerging: true, emerged: false, respawnTimer: null } : b
       );
-    }, 500);
-
-    setTimeout(() => {
-      setBubbles(prev => prev.map(b =>
-        b.id === bubble.id ? { ...b, opacity: 1 } : b
-      ));
-      bubblesRef.current = bubblesRef.current.map(b =>
-        b.id === bubble.id ? { ...b, opacity: 1 } : b
-      );
-    }, 5500);
+    }, reemergeDelay);
   }, [onSpeciesClick]);
 
   // ====== EXISTING MEMO DATA ======
@@ -689,7 +721,8 @@ export default function OceanScene({
       {/* SPECIES BUBBLES */}
       <div className="absolute inset-0 z-[8]">
         {currentBubbles.map((b) => {
-          if (!b.active && b.respawnTimer !== null && b.respawnTimer > 0) {
+          // Hidden bubbles (just clicked, waiting to re-emerge)
+          if (!b.active && !b.emerging) {
             return <div key={b.id} />;
           }
 
@@ -699,6 +732,9 @@ export default function OceanScene({
           const parallaxX = mousePos.x * b.parallaxFactor * 6;
           const parallaxY = mousePos.y * b.parallaxFactor * 4;
 
+          // Fade in effect during emergence
+          const emergenceOpacity = b.emerging ? Math.min(1, (110 - b.y) / 30) : b.opacity;
+
           return (
             <div
               key={b.id}
@@ -707,8 +743,8 @@ export default function OceanScene({
                 left: `${b.x}%`,
                 top: `${b.y}%`,
                 transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${b.scale})`,
-                opacity: b.opacity,
-                transition: 'opacity 0.8s ease-out, transform 0.7s ease-out',
+                opacity: isBursting ? 0 : emergenceOpacity,
+                transition: isBursting ? 'opacity 0.15s, transform 0.15s' : 'opacity 0.8s ease-out, transform 0.7s ease-out',
                 zIndex: 8 + Math.round(b.size / 15),
               }}
               onClick={() => handleBubbleClick(b)}

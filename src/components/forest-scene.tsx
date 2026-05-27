@@ -25,6 +25,9 @@ interface LightSpot {
   parallaxFactor: number;
   midX: number;
   midY: number;
+  visible: boolean;
+  emergeDelay: number;   // seconds before first emergence
+  emergeProgress: number; // 0-1, controls the "growing" animation
 }
 
 interface FireflyData {
@@ -91,6 +94,9 @@ export default function ForestScene({
   const [mounted, setMounted] = useState(false);
   const [animals, setAnimals] = useState<AnimalSilhouette[]>([]);
   const [dayNightPhase, setDayNightPhase] = useState(0);
+  const [spotVisibility, setSpotVisibility] = useState<Record<string, { visible: boolean; emergeProgress: number }>>({});
+  const mountTimeRef = useRef<number>(0);
+  const hiddenTimersRef = useRef<Record<string, number>>({});
 
   // Day-night cycle: 60s period
   useEffect(() => {
@@ -107,7 +113,7 @@ export default function ForestScene({
   const px = (mousePos.x - 0.5) * 30;
   const py = (mousePos.y - 0.5) * 20;
 
-  // Initialize light spots
+  // Initialize light spots - all hidden initially, emerge one by one
   useEffect(() => {
     spotsRef.current = species.map((sp, i) => ({
       id: sp.id,
@@ -122,14 +128,37 @@ export default function ForestScene({
       parallaxFactor: 0.3 + Math.random() * 0.4,
       midX: 50 + (Math.random() - 0.5) * 30,
       midY: 50 + (Math.random() - 0.5) * 25,
+      visible: false,
+      emergeDelay: 0.5 + i * 0.25 + Math.random() * 1.5,  // stagger: 0.5s ~ 15s
+      emergeProgress: 0,
     }));
   }, [species]);
 
-  // Animate light spots - random walk
+  // Cleanup hidden timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(hiddenTimersRef.current).forEach(clearTimeout);
+    };
+  }, []);
+
+  // Animate light spots - random walk + progressive emergence
   useEffect(() => {
     setMounted(true);
+    mountTimeRef.current = Date.now();
+
+    // Initialize all spots as not visible
+    const initVis: Record<string, { visible: boolean; emergeProgress: number }> = {};
+    spotsRef.current.forEach(s => {
+      initVis[s.id] = { visible: false, emergeProgress: 0 };
+    });
+    setSpotVisibility(initVis);
+
     const animate = () => {
+      const elapsed = (Date.now() - mountTimeRef.current) / 1000; // seconds since mount
+      let visibilityChanged = false;
+
       spotsRef.current.forEach((spot) => {
+        // Drift logic
         spot.vx += (Math.random() - 0.5) * 0.008;
         spot.vy += (Math.random() - 0.5) * 0.008;
         spot.vx *= 0.97;
@@ -144,7 +173,31 @@ export default function ForestScene({
         if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy); }
         if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy); }
         spot.breathPhase += 0.025;
+
+        // Emergence logic
+        const prev = spotVisibility[spot.id] || { visible: false, emergeProgress: 0 };
+        if (!prev.visible && elapsed >= spot.emergeDelay) {
+          // Start emerging
+          const progress = Math.min(1, (elapsed - spot.emergeDelay) / 1.2); // 1.2s to fully emerge
+          if (progress >= 1) {
+            spot.visible = true;
+            spot.emergeProgress = 1;
+            if (!prev.visible || prev.emergeProgress !== 1) visibilityChanged = true;
+          } else {
+            spot.emergeProgress = progress;
+            visibilityChanged = true;
+          }
+        }
       });
+
+      if (visibilityChanged) {
+        const newVis: Record<string, { visible: boolean; emergeProgress: number }> = {};
+        spotsRef.current.forEach(s => {
+          newVis[s.id] = { visible: s.visible, emergeProgress: s.emergeProgress };
+        });
+        setSpotVisibility(newVis);
+      }
+
       animFrameRef.current = requestAnimationFrame(animate);
     };
     animFrameRef.current = requestAnimationFrame(animate);
@@ -273,6 +326,37 @@ export default function ForestScene({
   const handleClick = useCallback((spot: LightSpot) => {
     const sp = species.find((s) => s.id === spot.speciesId);
     if (sp) onSpeciesClick(sp);
+
+    // Hide the spot and schedule re-emergence after 8-12 seconds
+    spot.visible = false;
+    spot.emergeProgress = 0;
+    setSpotVisibility(prev => ({ ...prev, [spot.id]: { visible: false, emergeProgress: 0 } }));
+
+    // Clear any existing timer for this spot
+    if (hiddenTimersRef.current[spot.id]) {
+      clearTimeout(hiddenTimersRef.current[spot.id]);
+    }
+
+    const reemergeDelay = 8000 + Math.random() * 4000; // 8-12 seconds
+    hiddenTimersRef.current[spot.id] = window.setTimeout(() => {
+      const reemergeDuration = 1.2; // 1.2s to fully emerge
+      const startTime = Date.now();
+
+      const animateReemerge = () => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const progress = Math.min(1, elapsed / reemergeDuration);
+        spot.emergeProgress = progress;
+        if (progress >= 1) {
+          spot.visible = true;
+          spot.emergeProgress = 1;
+        }
+        setSpotVisibility(prev => ({ ...prev, [spot.id]: { visible: progress >= 1, emergeProgress: progress } }));
+        if (progress < 1) {
+          requestAnimationFrame(animateReemerge);
+        }
+      };
+      requestAnimationFrame(animateReemerge);
+    }, reemergeDelay);
   }, [species, onSpeciesClick]);
 
   if (!mounted) return <div className="w-full h-full" />;
@@ -466,6 +550,10 @@ export default function ForestScene({
       {/* ====== BRIGHT FLOATING LIGHT SPOTS (interactive, freely drifting) ====== */}
       <div className="absolute inset-0 z-[8]">
         {spotsRef.current.map((spot) => {
+          const vis = spotVisibility[spot.id];
+          // Not yet emerged or explicitly hidden
+          if (!vis || (vis.emergeProgress === 0 && !vis.visible)) return null;
+
           const isUnlocked = unlockedIds.has(spot.id);
           const isRecent = recentlyClicked.has(spot.id);
           const isDiscovered = isUnlocked && isRecent;
@@ -474,6 +562,24 @@ export default function ForestScene({
           const parallaxX = px * spot.size * 0.3 * spot.parallaxFactor;
           const parallaxY = py * spot.size * 0.25 * spot.parallaxFactor;
           const breathScale = 1 + Math.sin(spot.breathPhase) * 0.08;
+
+          // Emerge animation: ease-out cubic curve for "pop out" effect
+          const ep = vis.emergeProgress;
+          const easedProgress = 1 - Math.pow(1 - ep, 3); // cubic ease-out
+          const emergeScale = easedProgress;
+          const emergeOpacity = easedProgress;
+
+          // Final scale: combine emerge scale with breath/burst/discovered states
+          let finalScale: number;
+          if (isBursting) {
+            finalScale = emergeScale * 1.3;
+          } else if (isDiscovered) {
+            finalScale = emergeScale * 0.7 * breathScale;
+          } else {
+            finalScale = emergeScale * breathScale;
+          }
+
+          const finalOpacity = isBursting ? 0 : isDiscovered ? 0.45 * emergeOpacity : emergeOpacity;
 
           return (
             <div
@@ -484,9 +590,9 @@ export default function ForestScene({
                 top: `${spot.y}%`,
                 width: `${spot.size * 2}px`,
                 height: `${spot.size * 2}px`,
-                transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${isBursting ? 1.3 : isDiscovered ? 0.7 * breathScale : breathScale})`,
-                transition: isBursting ? 'transform 0.15s ease-out' : 'transform 0.6s ease-out, opacity 0.7s ease-out',
-                opacity: isBursting ? 0 : isDiscovered ? 0.45 : 1,
+                transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${finalScale})`,
+                transition: isBursting ? 'transform 0.15s ease-out' : 'transform 0.6s ease-out',
+                opacity: finalOpacity,
                 marginLeft: `-${spot.size}px`,
                 marginTop: `-${spot.size}px`,
               }}
