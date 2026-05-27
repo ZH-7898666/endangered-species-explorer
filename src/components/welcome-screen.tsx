@@ -60,7 +60,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
     { text: '荧光光斑藏着森林深处最后的居民', className: 'text-white/50' },
     { text: '在那片沉默的深海里', className: 'text-white/60' },
     { text: '渐变气泡封存着大洋之心最珍贵的秘密', className: 'text-white/50' },
-    { text: '81种濒危生灵等你来探索', className: 'text-white/70' },
+    { text: '109种濒危生灵等你来探索', className: 'text-white/70' },
     { text: '它们正在消失，而我们可以学会守护', className: 'text-white/80' },
   ];
 
