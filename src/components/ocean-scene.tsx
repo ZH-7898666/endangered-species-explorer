@@ -35,7 +35,6 @@ interface BubbleState {
   wobbleAmp: number;
   riseSpeed: number;
   breathDuration: number;
-  parallaxFactor: number;
   active: boolean;
   respawnTimer: number | null;
   emerged: boolean;    // whether bubble has finished rising to targetY
@@ -209,7 +208,6 @@ export default function OceanScene({
       wobbleAmp: 4 + Math.random() * 8,
       riseSpeed: 0.15 + Math.random() * 0.1,  // rise speed (faster than drift)
       breathDuration: 4 + Math.random() * 2,
-      parallaxFactor: 0.05 + Math.random() * 0.15,
       active: false,
       respawnTimer: null,
       emerged: false,
@@ -729,8 +727,6 @@ export default function OceanScene({
           const bubbleColor = BUBBLE_COLORS[b.color] || BUBBLE_COLORS.cyan;
           const isDiscovered = unlockedIds.has(b.species.id) && recentlyClicked.has(b.species.id);
           const isBursting = burstingId === b.species.id;
-          const parallaxX = mousePos.x * b.parallaxFactor * 6;
-          const parallaxY = mousePos.y * b.parallaxFactor * 4;
 
           // Fade in effect during emergence
           const emergenceOpacity = b.emerging ? Math.min(1, (110 - b.y) / 30) : b.opacity;
@@ -742,7 +738,7 @@ export default function OceanScene({
               style={{
                 left: `${b.x}%`,
                 top: `${b.y}%`,
-                transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${b.scale})`,
+                transform: `scale(${b.scale})`,
                 opacity: isBursting ? 0 : emergenceOpacity,
                 transition: isBursting ? 'opacity 0.15s, transform 0.15s' : 'opacity 0.8s ease-out, transform 0.7s ease-out',
                 zIndex: 8 + Math.round(b.size / 15),

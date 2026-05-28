@@ -22,7 +22,6 @@ interface LightSpot {
   emoji?: string;
   speciesId: string;
   breathPhase: number;
-  parallaxFactor: number;
   midX: number;
   midY: number;
   visible: boolean;
@@ -41,7 +40,6 @@ interface FireflyData {
   blinkDelay: number;
   driftX: number;
   driftY: number;
-  parallaxFactor: number;
 }
 
 interface MushroomData {
@@ -125,7 +123,6 @@ export default function ForestScene({
       emoji: sp.emoji,
       speciesId: sp.id,
       breathPhase: Math.random() * Math.PI * 2,
-      parallaxFactor: 0.3 + Math.random() * 0.4,
       midX: 50 + (Math.random() - 0.5) * 30,
       midY: 50 + (Math.random() - 0.5) * 25,
       visible: false,
@@ -279,7 +276,6 @@ export default function ForestScene({
       blinkDelay: Math.random() * -5,
       driftX: (Math.random() - 0.5) * 30,
       driftY: (Math.random() - 0.5) * 20,
-      parallaxFactor: 0.2 + Math.random() * 0.4,
     })), []);
 
   // Glowing mushrooms
@@ -540,8 +536,6 @@ export default function ForestScene({
               background: 'rgba(232,200,64,1)',
               boxShadow: `0 0 ${ff.size * 4}px rgba(232,200,64,0.8), 0 0 ${ff.size * 8}px rgba(232,200,64,0.4), 0 0 ${ff.size * 12}px rgba(232,200,64,0.15)`,
               animation: `fireflyFloat ${ff.duration}s ease-in-out ${ff.delay}s infinite, fireflyBlink ${ff.blinkDuration}s ease-in-out ${ff.blinkDelay}s infinite`,
-              transform: `translate(${px * ff.driftX * ff.parallaxFactor}px, ${py * ff.driftY * ff.parallaxFactor}px)`,
-              transition: 'transform 0.8s ease-out',
             }}
           />
         ))}
@@ -559,8 +553,6 @@ export default function ForestScene({
           const isDiscovered = isUnlocked && isRecent;
           const isBursting = burstingId === spot.id;
 
-          const parallaxX = px * spot.size * 0.3 * spot.parallaxFactor;
-          const parallaxY = py * spot.size * 0.25 * spot.parallaxFactor;
           const breathScale = 1 + Math.sin(spot.breathPhase) * 0.08;
 
           // Emerge animation: ease-out cubic curve for "pop out" effect
@@ -590,7 +582,7 @@ export default function ForestScene({
                 top: `${spot.y}%`,
                 width: `${spot.size * 2}px`,
                 height: `${spot.size * 2}px`,
-                transform: `translate(${parallaxX}px, ${parallaxY}px) scale(${finalScale})`,
+                transform: `scale(${finalScale})`,
                 transition: isBursting ? 'transform 0.15s ease-out' : 'transform 0.6s ease-out',
                 opacity: finalOpacity,
                 marginLeft: `-${spot.size}px`,
@@ -640,8 +632,6 @@ export default function ForestScene({
       {burstingId && (() => {
         const spot = spotsRef.current.find((s) => s.id === burstingId);
         if (!spot) return null;
-        const parallaxX = px * spot.size * 0.3 * spot.parallaxFactor;
-        const parallaxY = py * spot.size * 0.25 * spot.parallaxFactor;
         const fragments = Array.from({ length: 12 }, (_, i) => {
           const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.3;
           const distance = 40 + Math.random() * 60;
@@ -656,7 +646,7 @@ export default function ForestScene({
                 marginLeft: `-${frag.size / 2}px`, marginTop: `-${frag.size / 2}px`,
                 background: 'rgba(255,240,180,0.9)',
                 boxShadow: `0 0 ${frag.size * 3}px rgba(232,200,64,0.6), 0 0 ${frag.size * 6}px rgba(232,200,64,0.2)`,
-                transform: `translate(${parallaxX}px, ${parallaxY}px)`,
+                transform: `translate(0px, 0px)`,
                 animation: `lightBurst ${0.5 + frag.delay}s ease-out forwards`,
                 '--burst-x': `${Math.cos(frag.angle) * frag.distance}px`,
                 '--burst-y': `${Math.sin(frag.angle) * frag.distance}px`,
@@ -667,7 +657,6 @@ export default function ForestScene({
               width: `${spot.size * 2}px`, height: `${spot.size * 2}px`,
               marginLeft: `-${spot.size}px`, marginTop: `-${spot.size}px`,
               border: '2px solid rgba(232,200,64,0.5)',
-              transform: `translate(${parallaxX}px, ${parallaxY}px)`,
               animation: 'glowRingExpand 0.6s ease-out forwards',
             }} />
           </div>
