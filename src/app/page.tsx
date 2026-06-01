@@ -36,6 +36,7 @@ export default function Home() {
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<'forward' | 'backward'>('forward');
   const [flipScene, setFlipScene] = useState<'forest' | 'ocean'>('forest');
+  const [appState, setAppState] = useState<'loading' | 'welcome' | 'explore'>('loading');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
@@ -43,6 +44,7 @@ export default function Home() {
   const handleLoadingComplete = useCallback(() => {
     setIsLoading(false);
     setIsWelcome(true);
+    setAppState('welcome');
   }, []);
 
   const handleWelcomeComplete = useCallback(() => {
@@ -58,6 +60,7 @@ export default function Home() {
       setIsWelcome(false);
     }
     setCurrentScene(flipScene);
+    setAppState('explore');
   }, [isWelcome, flipScene]);
 
   const handleSceneChange = useCallback((newScene: 'forest' | 'ocean') => {
@@ -185,23 +188,24 @@ export default function Home() {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
-  if (isWelcome) {
+  // Welcome screen without flip
+  if (isWelcome && !isFlipping) {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
+
+  // During page flip from welcome: show welcome screen fading out + scene underneath
 
   return (
     <div
       className="relative w-screen h-screen overflow-hidden"
       style={{
-        cursor: isPanning.current ? 'grabbing' : 'default',
-        opacity: isEntering ? 0 : 1,
-        transition: isEntering ? 'opacity 0.8s ease-out' : 'none',
+        cursor: appState === 'explore' ? (isPanning.current ? 'grabbing' : 'default') : 'default',
       }}
       ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMovePan}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseDown={appState === 'explore' ? handleMouseDown : undefined}
+      onMouseMove={appState === 'explore' ? handleMouseMovePan : undefined}
+      onMouseUp={appState === 'explore' ? handleMouseUp : undefined}
+      onMouseLeave={appState === 'explore' ? handleMouseUp : undefined}
     >
       {/* Scene container - this is the "world" that we navigate through */}
       <div
@@ -239,6 +243,13 @@ export default function Home() {
           />
         )}
       </div>
+
+      {/* Welcome screen during flip - rendered on top of scene so it appears to flip away */}
+      {isWelcome && isFlipping && (
+        <div className="absolute inset-0 z-30">
+          <WelcomeScreen onComplete={() => {}} />
+        </div>
+      )}
 
       {/* UI Overlay - Journal field notes style */}
       {/* Scene name & description - vintage label sticker */}
