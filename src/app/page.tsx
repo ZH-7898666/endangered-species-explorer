@@ -222,33 +222,68 @@ export default function Home() {
         )}
       </div>
 
-      {/* UI Overlay - fixed on screen, not affected by zoom/pan */}
-      {/* Scene name & description */}
+      {/* UI Overlay - Journal field notes style */}
+      {/* Scene name & description - vintage label sticker */}
       <div className="absolute bottom-8 left-8 z-50 select-none">
-        <h2 className="text-white/70 text-lg font-medium tracking-wider" style={{ fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif" }}>
-          {sceneLabel}
-        </h2>
-        <p className="text-white/30 text-xs mt-1 tracking-widest">
-          {sceneDesc}
-        </p>
-        <p className="text-white/20 text-[10px] mt-2 tracking-wide">
-          滚轮缩放 · Ctrl+拖拽平移 · 点击探索
-        </p>
+        <div className="relative px-4 py-3" style={{
+          background: currentScene === 'forest'
+            ? 'linear-gradient(135deg, rgba(180,150,40,0.12), rgba(139,109,60,0.08))'
+            : 'linear-gradient(135deg, rgba(60,120,180,0.10), rgba(80,100,140,0.06))',
+          border: '1px solid rgba(139,109,60,0.2)',
+          borderRadius: '2px',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}>
+          {/* Tape at top */}
+          <div className="absolute -top-1.5 left-3 w-10 h-3" style={{
+            background: 'rgba(255,250,230,0.25)',
+            transform: 'rotate(-1deg)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+          }} />
+          {/* Corner fold */}
+          <div className="absolute top-0 right-0 w-5 h-5 pointer-events-none" style={{
+            background: 'linear-gradient(225deg, transparent 50%, rgba(139,109,60,0.08) 50%)',
+            borderTop: '1px solid rgba(139,109,60,0.15)',
+            borderRight: '1px solid rgba(139,109,60,0.15)',
+          }} />
+          <h2 className="text-base font-medium tracking-wide" style={{
+            color: currentScene === 'forest' ? 'rgba(232,200,64,0.85)' : 'rgba(140,200,240,0.85)',
+            fontFamily: 'var(--font-journal)',
+          }}>
+            {sceneLabel}
+          </h2>
+          <p className="text-[11px] mt-0.5 tracking-wide" style={{
+            color: currentScene === 'forest' ? 'rgba(232,200,64,0.4)' : 'rgba(140,200,240,0.4)',
+            fontFamily: 'var(--font-journal)',
+          }}>
+            {sceneDesc}
+          </p>
+          <p className="text-[9px] mt-2 tracking-wide" style={{
+            color: 'rgba(255,255,255,0.2)',
+            fontFamily: 'var(--font-journal)',
+          }}>
+            滚轮缩放 · Ctrl+拖拽平移 · 点击探索
+          </p>
+        </div>
       </div>
 
-      {/* Species counter */}
+      {/* Species counter - journal annotation style */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 select-none">
         <div
-          className="px-5 py-2 rounded-full flex items-center gap-2"
+          className="relative px-5 py-2 flex items-center gap-3"
           style={{
-            background: 'rgba(255,255,255,0.06)',
+            background: 'linear-gradient(135deg, rgba(245,230,200,0.10), rgba(245,230,200,0.05))',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(139,109,60,0.2)',
+            borderRadius: '2px',
           }}
         >
-          <span className="text-white/50 text-xs tracking-wider">已发现</span>
-          <span className="text-white/90 text-sm font-medium">
-            {unlockedIds.size}/{currentSpecies.length}
+          {/* Ink pen icon */}
+          <span className="text-xs opacity-50">🖊</span>
+          <span className="text-xs tracking-wider" style={{ color: 'rgba(245,230,200,0.5)', fontFamily: 'var(--font-journal)' }}>已记录</span>
+          <span className="text-sm font-medium" style={{ color: 'rgba(245,230,200,0.9)', fontFamily: 'var(--font-journal)' }}>
+            {unlockedIds.size}<span className="text-xs opacity-40">/{currentSpecies.length}</span>
           </span>
         </div>
       </div>
@@ -263,7 +298,7 @@ export default function Home() {
 
       {/* Zoom indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 select-none">
-        <span className="text-white/15 text-[10px] tracking-wider">
+        <span className="text-[9px] tracking-wider" style={{ color: 'rgba(255,255,255,0.15)', fontFamily: 'var(--font-journal)' }}>
           {Math.round(zoom * 100)}%
         </span>
       </div>

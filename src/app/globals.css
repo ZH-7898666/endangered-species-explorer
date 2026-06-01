@@ -1,3 +1,4 @@
+@import 'https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -101,6 +102,327 @@
 body {
   @apply font-sans;
   overflow: hidden;
+}
+
+/* ========== Journal / Atlas Design System ========== */
+
+/* Paper texture overlay — applied to all journal-styled elements */
+.journal-paper {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(139, 115, 85, 0.06) 27px,
+      rgba(139, 115, 85, 0.06) 28px
+    ),
+    linear-gradient(135deg,
+      #f5ead6 0%, #efe0c8 25%, #f8eed8 50%, #f0e4cc 75%, #f5ead6 100%
+    );
+  position: relative;
+}
+
+.journal-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(139, 115, 85, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(120, 90, 60, 0.06) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* Aged paper edge vignette */
+.journal-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 60px rgba(101, 67, 33, 0.15);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Dark paper variant for scene overlays */
+.journal-paper-dark {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(200, 180, 140, 0.03) 27px,
+      rgba(200, 180, 140, 0.03) 28px
+    ),
+    linear-gradient(135deg,
+      rgba(30, 28, 20, 0.92) 0%,
+      rgba(40, 36, 26, 0.92) 50%,
+      rgba(30, 28, 20, 0.92) 100%
+    );
+  position: relative;
+}
+
+.journal-paper-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(200, 180, 140, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(180, 160, 120, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* Decorative corner ornaments */
+.journal-corner {
+  position: relative;
+}
+
+.journal-corner::before,
+.journal-corner::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(181, 148, 98, 0.5);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.journal-corner::before {
+  top: 8px;
+  left: 8px;
+  border-width: 2px 0 0 2px;
+  border-radius: 2px 0 0 0;
+}
+
+.journal-corner::after {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 2px 0;
+}
+
+/* Tape strip decoration (for labels and stickers) */
+.tape-strip {
+  position: relative;
+}
+
+.tape-strip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 60%;
+  height: 12px;
+  background: rgba(220, 200, 160, 0.35);
+  border-radius: 1px;
+  backdrop-filter: blur(1px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+/* Stitched border effect */
+.stitched-border {
+  border: 1.5px dashed rgba(181, 148, 98, 0.4);
+  outline: 1px solid rgba(181, 148, 98, 0.1);
+  outline-offset: 3px;
+}
+
+/* Wax seal stamp effect */
+.wax-seal {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c45c3a, #8b3a20 60%, #6b2a15);
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.3),
+    inset 0 1px 2px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 240, 220, 0.85);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Handwritten annotation style text */
+.annotation-text {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-style: italic;
+  color: rgba(101, 67, 33, 0.7);
+  letter-spacing: 0.02em;
+}
+
+.annotation-text-light {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-style: italic;
+  color: rgba(220, 200, 160, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* Decorative divider line */
+.journal-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.journal-divider::before,
+.journal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(181, 148, 98, 0.4), transparent);
+}
+
+.journal-divider-icon {
+  color: rgba(181, 148, 98, 0.6);
+  font-size: 12px;
+}
+
+/* Tag/label sticker style */
+.sticker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(220, 200, 160, 0.2);
+  border: 1px solid rgba(181, 148, 98, 0.3);
+  border-radius: 2px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(181, 148, 98, 0.8);
+  position: relative;
+}
+
+/* FOLD effect on corner */
+.folded-corner {
+  position: relative;
+}
+
+.folded-corner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(225deg, transparent 50%, rgba(181, 148, 98, 0.25) 50%);
+  border-bottom: 1px solid rgba(181, 148, 98, 0.15);
+  border-left: 1px solid rgba(181, 148, 98, 0.15);
+  pointer-events: none;
+}
+
+/* Ink blot decoration */
+.ink-blot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(101, 67, 33, 0.12);
+  pointer-events: none;
+}
+
+/* Conservation level bar with gradient */
+.conservation-bar {
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(181, 148, 98, 0.15);
+}
+
+.conservation-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.conservation-bar-fill.cr { background: linear-gradient(90deg, #c45c3a, #e87454); }
+.conservation-bar-fill.en { background: linear-gradient(90deg, #d48a3a, #e8a854); }
+.conservation-bar-fill.vu { background: linear-gradient(90deg, #c4a43a, #e8c854); }
+.conservation-bar-fill.nt { background: linear-gradient(90deg, #7aaa5a, #98c870); }
+.conservation-bar-fill.lc { background: linear-gradient(90deg, #5a9a6a, #70b880); }
+
+/* Stamp number effect */
+.stamp-number {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  font-size: 32px;
+  color: rgba(181, 70, 50, 0.25);
+  border: 2px solid rgba(181, 70, 50, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  transform: rotate(-3deg);
+  line-height: 1;
+}
+
+/* Page curl animation for cards */
+@keyframes pageCurlIn {
+  0% {
+    opacity: 0;
+    transform: perspective(800px) rotateY(-30deg) scale(0.9);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(800px) rotateY(0) scale(1);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
+}
+
+@keyframes pageCurlOut {
+  0% {
+    opacity: 1;
+    transform: perspective(800px) rotateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(800px) rotateY(30deg) scale(0.9);
+  }
+}
+
+/* Notebook page turn edge effect */
+.page-edge {
+  position: relative;
+}
+
+.page-edge::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: -3px;
+  bottom: 4px;
+  width: 3px;
+  background: linear-gradient(180deg,
+    rgba(181, 148, 98, 0.1),
+    rgba(181, 148, 98, 0.2),
+    rgba(181, 148, 98, 0.1)
+  );
+  border-radius: 0 1px 1px 0;
+  pointer-events: none;
+}
+
+/* Leather binding edge */
+.binding-edge {
+  position: relative;
+}
+
+.binding-edge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 16px;
+  background: linear-gradient(90deg,
+    rgba(80, 50, 25, 0.6),
+    rgba(100, 65, 30, 0.4),
+    rgba(80, 50, 25, 0.2),
+    transparent
+  );
+  pointer-events: none;
 }
 
 /* ========== Scene Container ========== */
@@ -954,6 +1276,65 @@ body {
     box-shadow: 0 0 25px rgba(232,200,64,0.15), 0 0 50px rgba(100,200,240,0.08);
   }
 }
+
+/* ========== Journal / Bestiary Style ========== */
+@keyframes sealGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(140,60,40,0.2), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,200,150,0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(140,60,40,0.35), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,200,150,0.2);
+  }
+}
+
+@keyframes stampRotate {
+  from { transform: rotate(-8deg) scale(0.8); opacity: 0; }
+  to { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+
+@keyframes quillWrite {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes labelPeel {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(0deg); }
+}
+
+/* Journal decorative line */
+.journal-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,180,120,0.3), transparent);
+  margin: 12px 0;
+}
+
+/* Sticker/label effect */
+.sticker-label {
+  background: linear-gradient(135deg, rgba(200,180,120,0.12) 0%, rgba(180,160,100,0.08) 100%);
+  border: 1px solid rgba(200,180,120,0.2);
+  padding: 4px 12px;
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Paper tape effect */
+.tape-strip {
+  background: linear-gradient(135deg, rgba(200,180,120,0.1) 0%, rgba(180,160,100,0.06) 100%);
+  padding: 2px 16px;
+  position: relative;
+}
+.tape-strip::before,
+.tape-strip::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 6px;
+  background: linear-gradient(180deg, transparent 10%, rgba(200,180,120,0.15) 20%, rgba(200,180,120,0.15) 80%, transparent 90%);
+}
+.tape-strip::before { left: 0; }
+.tape-strip::after { right: 0; }
 
 /* ========== Compass Navigation ========== */
 @keyframes compassRingSpin {

@@ -18,132 +18,203 @@ export default function CompassNav({ currentScene, onSwitch }: CompassNavProps) 
     setTimeout(() => setIsAnimating(false), 800);
   }, [isAnimating, onSwitch]);
 
-  // Forest = green side (left), Ocean = blue side (right)
   const isForest = currentScene === 'forest';
 
-  // Active highlight position: 0 = left (forest), 1 = right (ocean)
-  const [highlightPos, setHighlightPos] = useState(isForest ? 0 : 1);
-
+  // Compass needle rotation: 0° = North (forest), 180° = South (ocean)
+  const [needleRotation, setNeedleRotation] = useState(isForest ? 0 : 180);
   useEffect(() => {
-    setHighlightPos(isForest ? 0 : 1);
+    setNeedleRotation(isForest ? 0 : 180);
   }, [isForest]);
-
-  // Outer ring gradient rotation based on scene
-  const ringRotation = isForest ? 0 : 180;
 
   return (
     <div className="relative flex flex-col items-center gap-2 select-none">
-      {/* Main compass */}
+      {/* Main compass - brass antique style */}
       <button
         onClick={handleClick}
         onMouseEnter={() => setHoveredScene(isForest ? 'ocean' : 'forest')}
         onMouseLeave={() => setHoveredScene(null)}
-        className="relative w-16 h-16 rounded-full transition-transform duration-300 hover:scale-110 active:scale-95"
+        className="relative w-[68px] h-[68px] rounded-full transition-transform duration-300 hover:scale-110 active:scale-95"
         style={{
-          background: 'rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'radial-gradient(circle at 35% 35%, #c9a84c, #8b6914 40%, #6b4f12 70%, #4a3508 100%)',
+          boxShadow: `
+            0 0 0 2px #3d2b08,
+            0 0 0 4px #6b4f12,
+            0 0 0 5px #3d2b08,
+            0 2px 8px rgba(0,0,0,0.6),
+            inset 0 1px 2px rgba(255,220,120,0.3)
+          `,
         }}
       >
-        {/* Rotating gradient ring */}
+        {/* Inner aged metal ring */}
         <div
-          className="absolute inset-[3px] rounded-full"
+          className="absolute inset-[4px] rounded-full"
           style={{
-            background: `conic-gradient(
-              from ${ringRotation}deg,
-              rgba(232,200,64,0.5) 0deg,
-              rgba(184,212,48,0.3) 90deg,
-              rgba(100,200,240,0.3) 180deg,
-              rgba(140,120,220,0.5) 270deg,
-              rgba(232,200,64,0.5) 360deg
-            )`,
-            animation: 'compassRingSpin 12s linear infinite',
-            opacity: 0.6,
+            background: 'radial-gradient(circle at 40% 35%, #b8972e, #7a5c10 50%, #5a420c 80%)',
+            boxShadow: 'inset 0 1px 3px rgba(255,220,120,0.2), inset 0 -1px 2px rgba(0,0,0,0.4)',
           }}
         />
 
-        {/* Inner dark circle */}
+        {/* Compass face */}
         <div
-          className="absolute inset-[5px] rounded-full"
+          className="absolute inset-[8px] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(20,30,20,0.9) 0%, rgba(12,24,40,0.9) 100%)',
+            background: 'radial-gradient(circle at 45% 40%, #2a2010, #1a1508 60%, #0f0d06 100%)',
+            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.6)',
           }}
         />
 
-        {/* Highlight indicator dot - slides between left (forest) and right (ocean) */}
-        <div
-          className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full transition-all duration-500 ease-out"
-          style={{
-            left: highlightPos === 0 ? '7px' : 'calc(100% - 17px)',
-            background: highlightPos === 0
-              ? 'radial-gradient(circle, rgba(232,200,64,0.9), rgba(184,212,48,0.6))'
-              : 'radial-gradient(circle, rgba(100,200,240,0.9), rgba(140,120,220,0.6))',
-            boxShadow: highlightPos === 0
-              ? '0 0 8px rgba(232,200,64,0.6), 0 0 20px rgba(232,200,64,0.2)'
-              : '0 0 8px rgba(100,200,240,0.6), 0 0 20px rgba(100,200,240,0.2)',
-          }}
-        />
-
-        {/* Center icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span
-            className="text-lg transition-all duration-500"
-            style={{
-              filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.3))',
-            }}
-          >
-            {isForest ? '🌿' : '🌊'}
-          </span>
+        {/* Compass rose - decorative lines */}
+        <div className="absolute inset-[10px] rounded-full" style={{ opacity: 0.25 }}>
+          {/* Cardinal direction ticks */}
+          {[0, 90, 180, 270].map((deg) => (
+            <div
+              key={deg}
+              className="absolute top-1/2 left-1/2 w-[1px] origin-bottom"
+              style={{
+                height: '42%',
+                transform: `translate(-50%, -100%) rotate(${deg}deg)`,
+                background: 'linear-gradient(to top, transparent 20%, #c9a84c 80%)',
+              }}
+            />
+          ))}
+          {/* Intercardinal ticks */}
+          {[45, 135, 225, 315].map((deg) => (
+            <div
+              key={deg}
+              className="absolute top-1/2 left-1/2 w-[1px] origin-bottom"
+              style={{
+                height: '30%',
+                transform: `translate(-50%, -100%) rotate(${deg}deg)`,
+                background: 'linear-gradient(to top, transparent 20%, #8b6914 80%)',
+              }}
+            />
+          ))}
         </div>
 
-        {/* Outer glow ring */}
+        {/* N/S/E/W labels */}
+        <span
+          className="absolute top-[12px] left-1/2 -translate-x-1/2 text-[7px] font-bold tracking-wider"
+          style={{ color: '#c9a84c', fontFamily: 'var(--font-journal)', opacity: 0.6 }}
+        >
+          N
+        </span>
+        <span
+          className="absolute bottom-[12px] left-1/2 -translate-x-1/2 text-[7px] tracking-wider"
+          style={{ color: '#8b6914', fontFamily: 'var(--font-journal)', opacity: 0.4 }}
+        >
+          S
+        </span>
+        <span
+          className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[7px] tracking-wider"
+          style={{ color: '#8b6914', fontFamily: 'var(--font-journal)', opacity: 0.4 }}
+        >
+          W
+        </span>
+        <span
+          className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[7px] tracking-wider"
+          style={{ color: '#8b6914', fontFamily: 'var(--font-journal)', opacity: 0.4 }}
+        >
+          E
+        </span>
+
+        {/* Compass needle */}
         <div
-          className="absolute -inset-1 rounded-full transition-all duration-500"
+          className="absolute top-1/2 left-1/2 transition-transform duration-700 ease-in-out"
           style={{
-            background: isForest
-              ? 'radial-gradient(circle, rgba(232,200,64,0.08) 0%, transparent 70%)'
-              : 'radial-gradient(circle, rgba(100,200,240,0.08) 0%, transparent 70%)',
+            width: '2px',
+            height: '36px',
+            transform: `translate(-50%, -50%) rotate(${needleRotation}deg)`,
           }}
+        >
+          {/* North end (red/warm) */}
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2"
+            style={{
+              width: 0,
+              height: 0,
+              borderLeft: '4px solid transparent',
+              borderRight: '4px solid transparent',
+              borderBottom: '16px solid #c44a2f',
+              filter: 'drop-shadow(0 0 2px rgba(196,74,47,0.5))',
+            }}
+          />
+          {/* South end (blue/cool) */}
+          <div
+            className="absolute bottom-0 left-1/2 -translate-x-1/2"
+            style={{
+              width: 0,
+              height: 0,
+              borderLeft: '3px solid transparent',
+              borderRight: '3px solid transparent',
+              borderTop: '14px solid #4a7a8c',
+            }}
+          />
+        </div>
+
+        {/* Center pivot */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[5px] h-[5px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, #d4af37, #8b6914)',
+            boxShadow: '0 0 3px rgba(0,0,0,0.5)',
+          }}
+        />
+
+        {/* Patina spots */}
+        <div
+          className="absolute top-[14px] right-[16px] w-[6px] h-[4px] rounded-full"
+          style={{ background: 'rgba(80,120,80,0.15)' }}
+        />
+        <div
+          className="absolute bottom-[16px] left-[18px] w-[4px] h-[3px] rounded-full"
+          style={{ background: 'rgba(80,120,80,0.1)' }}
         />
       </button>
 
-      {/* Scene label below compass */}
+      {/* Scene label - hand-written style */}
       <div
-        className="flex items-center gap-1 transition-all duration-500"
-        style={{ fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif" }}
+        className="flex items-center gap-2 transition-all duration-500"
+        style={{ fontFamily: 'var(--font-journal)' }}
       >
         <span
-          className="text-[10px] tracking-widest transition-colors duration-500"
+          className="text-[10px] tracking-wider transition-all duration-500"
           style={{
-            color: isForest ? 'rgba(232,200,64,0.5)' : 'rgba(232,200,64,0.2)',
+            color: isForest ? 'rgba(232,200,64,0.6)' : 'rgba(232,200,64,0.2)',
+            textDecoration: isForest ? 'underline' : 'none',
+            textUnderlineOffset: '2px',
+            textDecorationColor: 'rgba(232,200,64,0.3)',
           }}
         >
           森林
         </span>
-        <span className="text-[8px] text-white/15">·</span>
+        <span className="text-[7px]" style={{ color: 'rgba(139,105,20,0.4)' }}>✦</span>
         <span
-          className="text-[10px] tracking-widest transition-colors duration-500"
+          className="text-[10px] tracking-wider transition-all duration-500"
           style={{
-            color: !isForest ? 'rgba(100,200,240,0.5)' : 'rgba(100,200,240,0.2)',
+            color: !isForest ? 'rgba(100,200,240,0.6)' : 'rgba(100,200,240,0.2)',
+            textDecoration: !isForest ? 'underline' : 'none',
+            textUnderlineOffset: '2px',
+            textDecorationColor: 'rgba(100,200,240,0.3)',
           }}
         >
           海域
         </span>
       </div>
 
-      {/* Hover hint for target scene */}
+      {/* Hover hint */}
       {hoveredScene && (
         <div
-          className="absolute -top-8 whitespace-nowrap px-3 py-1 rounded-full text-[10px] tracking-wider transition-all duration-300"
+          className="absolute -top-9 whitespace-nowrap px-3 py-1 text-[10px] tracking-wider transition-all duration-300"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: hoveredScene === 'forest' ? 'rgba(232,200,64,0.7)' : 'rgba(100,200,240,0.7)',
-            fontFamily: "'PingFang SC', 'Noto Sans SC', system-ui, sans-serif",
+            fontFamily: 'var(--font-journal)',
+            background: 'linear-gradient(135deg, rgba(42,32,16,0.92), rgba(26,20,10,0.92))',
+            border: '1px solid rgba(139,105,20,0.3)',
+            borderRadius: '3px',
+            color: hoveredScene === 'forest' ? 'rgba(232,200,64,0.8)' : 'rgba(100,200,240,0.8)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
           }}
         >
-          {hoveredScene === 'forest' ? '🌿 前往秘境森林' : '🌊 前往深海海域'}
+          {hoveredScene === 'forest' ? '→ 秘境森林' : '→ 深海海域'}
         </div>
       )}
     </div>
