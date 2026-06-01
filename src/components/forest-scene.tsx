@@ -86,6 +86,8 @@ export default function ForestScene({
   mousePos,
   burstingId,
 }: ForestSceneProps) {
+  const MAX_VISIBLE_SPOTS = 10; // Max light spots visible at once
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number>(0);
   const spotsRef = useRef<LightSpot[]>([]);
@@ -95,6 +97,9 @@ export default function ForestScene({
   const [spotVisibility, setSpotVisibility] = useState<Record<string, { visible: boolean; emergeProgress: number }>>({});
   const mountTimeRef = useRef<number>(0);
   const hiddenTimersRef = useRef<Record<string, number>>({});
+  const speciesPoolRef = useRef<Species[]>([]);   // all species available for this scene
+  const activeSpeciesRef = useRef<Set<string>>(new Set()); // species currently shown as spots
+  const spawnTimerRef = useRef<number>(0);         // timer for checking if we need more spots
 
   // Day-night cycle: 60s period
   useEffect(() => {
@@ -111,25 +116,35 @@ export default function ForestScene({
   const px = (mousePos.x - 0.5) * 30;
   const py = (mousePos.y - 0.5) * 20;
 
-  // Initialize light spots - all hidden initially, emerge one by one
+  // Helper: create a light spot from a species at a random position
+  const createSpotFromSpecies = useCallback((sp: Species, index: number, delayBase: number): LightSpot => ({
+    id: sp.id,
+    x: 8 + Math.random() * 82,
+    y: 10 + Math.random() * 72,
+    size: 22 + (index % 5) * 6,
+    vx: (Math.random() - 0.5) * 0.06,
+    vy: (Math.random() - 0.5) * 0.05,
+    emoji: sp.emoji,
+    speciesId: sp.id,
+    breathPhase: Math.random() * Math.PI * 2,
+    midX: 50 + (Math.random() - 0.5) * 30,
+    midY: 50 + (Math.random() - 0.5) * 25,
+    visible: false,
+    emergeDelay: delayBase + Math.random() * 2,
+    emergeProgress: 0,
+  }), []);
+
+  // Initialize species pool and pick initial subset
   useEffect(() => {
-    spotsRef.current = species.map((sp, i) => ({
-      id: sp.id,
-      x: 8 + ((i * 37 + 13) % 84),
-      y: 10 + ((i * 29 + 7) % 75),
-      size: 22 + (i % 5) * 6,
-      vx: (Math.random() - 0.5) * 0.06,
-      vy: (Math.random() - 0.5) * 0.05,
-      emoji: sp.emoji,
-      speciesId: sp.id,
-      breathPhase: Math.random() * Math.PI * 2,
-      midX: 50 + (Math.random() - 0.5) * 30,
-      midY: 50 + (Math.random() - 0.5) * 25,
-      visible: false,
-      emergeDelay: 0.5 + i * 0.25 + Math.random() * 1.5,  // stagger: 0.5s ~ 15s
-      emergeProgress: 0,
-    }));
-  }, [species]);
+    speciesPoolRef.current = [...species];
+    const shuffled = [...species].sort(() => Math.random() - 0.5);
+    const initial = shuffled.slice(0, MAX_VISIBLE_SPOTS);
+    activeSpeciesRef.current = new Set(initial.map(s => s.id));
+
+    spotsRef.current = initial.map((sp, i) =>
+      createSpotFromSpecies(sp, i, 0.5 + i * 0.8)
+    );
+  }, [species, createSpotFromSpecies]);
 
   // Cleanup hidden timers on unmount
   useEffect(() => {
@@ -323,7 +338,10 @@ export default function ForestScene({
     const sp = species.find((s) => s.id === spot.speciesId);
     if (sp) onSpeciesClick(sp);
 
-    // Hide the spot and schedule re-emergence after 8-12 seconds
+    // Remove this species from active set
+    activeSpeciesRef.current.delete(spot.speciesId);
+
+    // Hide the spot immediately
     spot.visible = false;
     spot.emergeProgress = 0;
     setSpotVisibility(prev => ({ ...prev, [spot.id]: { visible: false, emergeProgress: 0 } }));
@@ -333,27 +351,43 @@ export default function ForestScene({
       clearTimeout(hiddenTimersRef.current[spot.id]);
     }
 
-    const reemergeDelay = 8000 + Math.random() * 4000; // 8-12 seconds
+    // After 3-5 seconds, spawn a NEW species from the pool
+    const spawnDelay = 3000 + Math.random() * 2000;
     hiddenTimersRef.current[spot.id] = window.setTimeout(() => {
-      const reemergeDuration = 1.2; // 1.2s to fully emerge
-      const startTime = Date.now();
+      // Remove the old spot from the array
+      spotsRef.current = spotsRef.current.filter(s => s.id !== spot.id);
 
-      const animateReemerge = () => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        const progress = Math.min(1, elapsed / reemergeDuration);
-        spot.emergeProgress = progress;
-        if (progress >= 1) {
-          spot.visible = true;
-          spot.emergeProgress = 1;
-        }
-        setSpotVisibility(prev => ({ ...prev, [spot.id]: { visible: progress >= 1, emergeProgress: progress } }));
-        if (progress < 1) {
-          requestAnimationFrame(animateReemerge);
-        }
-      };
-      requestAnimationFrame(animateReemerge);
-    }, reemergeDelay);
-  }, [species, onSpeciesClick]);
+      // Find a species not currently active
+      const available = speciesPoolRef.current.filter(s => !activeSpeciesRef.current.has(s.id));
+      if (available.length > 0) {
+        const newSpecies = available[Math.floor(Math.random() * available.length)];
+        activeSpeciesRef.current.add(newSpecies.id);
+
+        const newSpot = createSpotFromSpecies(newSpecies, Math.floor(Math.random() * 5), 0);
+        newSpot.emergeProgress = 0;
+        newSpot.visible = false;
+        spotsRef.current.push(newSpot);
+
+        // Animate the new spot emerging
+        const reemergeDuration = 1.2;
+        const startTime = Date.now();
+        const animateEmerge = () => {
+          const elapsed = (Date.now() - startTime) / 1000;
+          const progress = Math.min(1, elapsed / reemergeDuration);
+          newSpot.emergeProgress = progress;
+          if (progress >= 1) {
+            newSpot.visible = true;
+            newSpot.emergeProgress = 1;
+          }
+          setSpotVisibility(prev => ({ ...prev, [newSpot.id]: { visible: progress >= 1, emergeProgress: progress } }));
+          if (progress < 1) {
+            requestAnimationFrame(animateEmerge);
+          }
+        };
+        requestAnimationFrame(animateEmerge);
+      }
+    }, spawnDelay);
+  }, [species, onSpeciesClick, createSpotFromSpecies]);
 
   if (!mounted) return <div className="w-full h-full" />;
 

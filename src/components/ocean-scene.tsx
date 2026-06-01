@@ -186,37 +186,53 @@ export default function OceanScene({
       breathDelay: Math.random() * -4,
     })), []);
 
-  // ====== BUBBLE SYSTEM (progressive emergence from bottom) ======
+  // ====== BUBBLE SYSTEM (progressive emergence from bottom, limited concurrent) ======
+  const MAX_VISIBLE_BUBBLES = 10;
   const colorKeys = useMemo(() => Object.keys(BUBBLE_COLORS) as BubbleColorKey[], []);
   const mountTimeRef = useRef<number>(0);
   const hiddenTimersRef = useRef<Record<number, number>>({});
+  const speciesPoolRef = useRef<Species[]>([]);
+  const activeSpeciesRef = useRef<Set<string>>(new Set());
+  const nextBubbleIdRef = useRef<number>(0);
 
-  useEffect(() => {
-    mountTimeRef.current = Date.now();
-    const targetYs = species.map((_, i) => 10 + ((i * 29 + 7) % 70)); // deterministic target positions
-    const initial: BubbleState[] = species.map((sp, i) => ({
-      id: i,
+  // Helper: create a bubble from a species
+  const createBubbleFromSpecies = useCallback((sp: Species, delayBase: number): BubbleState => {
+    const id = nextBubbleIdRef.current++;
+    return {
+      id,
       species: sp,
-      x: 8 + ((i * 37 + 13) % 84),
-      y: 110 + Math.random() * 20,  // start below screen
-      targetY: targetYs[i],
+      x: 8 + Math.random() * 84,
+      y: 110 + Math.random() * 20,
+      targetY: 10 + Math.random() * 70,
       size: 18 + Math.random() * 16,
       scale: 1,
-      opacity: 0,  // invisible until emergence starts
+      opacity: 0,
       color: colorKeys[Math.floor(Math.random() * colorKeys.length)],
       emoji: sp.emoji || '🐠',
       wobbleAmp: 4 + Math.random() * 8,
-      riseSpeed: 0.15 + Math.random() * 0.1,  // rise speed (faster than drift)
+      riseSpeed: 0.15 + Math.random() * 0.1,
       breathDuration: 4 + Math.random() * 2,
       active: false,
       respawnTimer: null,
       emerged: false,
-      emergeDelay: 1 + i * 0.3 + Math.random() * 2,  // stagger: 1s ~ 20s
+      emergeDelay: delayBase + Math.random() * 2,
       emerging: false,
-    }));
-    bubblesRef.current = initial;
-    setBubbles(initial);
-  }, [species, colorKeys]);
+    };
+  }, [colorKeys]);
+
+  // Initialize species pool and pick initial subset
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+    speciesPoolRef.current = [...species];
+    const shuffled = [...species].sort(() => Math.random() - 0.5);
+    const initial = shuffled.slice(0, MAX_VISIBLE_BUBBLES);
+    activeSpeciesRef.current = new Set(initial.map(s => s.id));
+
+    bubblesRef.current = initial.map((sp, i) =>
+      createBubbleFromSpecies(sp, 1 + i * 0.6)
+    );
+    setBubbles(bubblesRef.current);
+  }, [species, colorKeys, createBubbleFromSpecies]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -258,6 +274,9 @@ export default function OceanScene({
     setBurstPositions(prev => ({ ...prev, [bubble.species.id]: { x: bubble.x, y: bubble.y } }));
     onSpeciesClick(bubble.species);
 
+    // Remove this species from active set
+    activeSpeciesRef.current.delete(bubble.species.id);
+
     // Hide the bubble (burst effect)
     setBubbles(prev => prev.map(b =>
       b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, emerged: false, emerging: false, respawnTimer: 0 } : b
@@ -266,23 +285,30 @@ export default function OceanScene({
       b.id === bubble.id ? { ...b, scale: 0, opacity: 0, active: false, emerged: false, emerging: false, respawnTimer: 0 } : b
     );
 
-    // After 8-12 seconds, re-emerge from bottom
-    const reemergeDelay = 8000 + Math.random() * 4000;
+    // After 3-5 seconds, spawn a NEW species from the pool
+    const spawnDelay = 3000 + Math.random() * 2000;
     if (hiddenTimersRef.current[bubble.id]) {
       clearTimeout(hiddenTimersRef.current[bubble.id]);
     }
     hiddenTimersRef.current[bubble.id] = window.setTimeout(() => {
-      const newY = 110 + Math.random() * 20;
-      const newTargetY = 10 + Math.random() * 70;
-      const newX = 8 + Math.random() * 84;
-      setBubbles(prev => prev.map(b =>
-        b.id === bubble.id ? { ...b, y: newY, targetY: newTargetY, x: newX, scale: 1, opacity: 0.8, active: true, emerging: true, emerged: false, respawnTimer: null } : b
-      ));
-      bubblesRef.current = bubblesRef.current.map(b =>
-        b.id === bubble.id ? { ...b, y: newY, targetY: newTargetY, x: newX, scale: 1, opacity: 0.8, active: true, emerging: true, emerged: false, respawnTimer: null } : b
-      );
-    }, reemergeDelay);
-  }, [onSpeciesClick]);
+      // Remove the old bubble
+      bubblesRef.current = bubblesRef.current.filter(b => b.id !== bubble.id);
+
+      // Find a species not currently active
+      const available = speciesPoolRef.current.filter(s => !activeSpeciesRef.current.has(s.id));
+      if (available.length > 0) {
+        const newSpecies = available[Math.floor(Math.random() * available.length)];
+        activeSpeciesRef.current.add(newSpecies.id);
+
+        const newBubble = createBubbleFromSpecies(newSpecies, 0);
+        newBubble.emerging = true;
+        newBubble.active = true;
+        newBubble.opacity = 0.8;
+        bubblesRef.current.push(newBubble);
+        setBubbles([...bubblesRef.current]);
+      }
+    }, spawnDelay);
+  }, [onSpeciesClick, createBubbleFromSpecies]);
 
   // ====== EXISTING MEMO DATA ======
   const fishShadows = useMemo(() =>
