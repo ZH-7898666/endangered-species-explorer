@@ -8,6 +8,7 @@ import { SpeciesCard } from '@/components/species-card';
 import { forestSpecies, oceanSpecies } from '@/data/species';
 import LoadingScreen from '@/components/loading-screen';
 import WelcomeScreen from '@/components/welcome-screen';
+import PageFlipOverlay from '@/components/page-flip-overlay';
 import CompassNav from '@/components/compass-nav';
 
 // World is 2x the viewport size - elements are spread across this larger space
@@ -32,6 +33,9 @@ export default function Home() {
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
   const panOrigin = useRef({ x: 0, y: 0 });
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [flipDirection, setFlipDirection] = useState<'forward' | 'backward'>('forward');
+  const [flipScene, setFlipScene] = useState<'forest' | 'ocean'>('forest');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
@@ -42,12 +46,26 @@ export default function Home() {
   }, []);
 
   const handleWelcomeComplete = useCallback(() => {
-    setIsEntering(true);
-    setTimeout(() => {
-      setIsWelcome(false);
-      setIsEntering(false);
-    }, 800);
+    // Flip the notebook page to reveal the forest scene
+    setFlipScene('forest');
+    setFlipDirection('forward');
+    setIsFlipping(true);
   }, []);
+
+  const handleFlipComplete = useCallback(() => {
+    setIsFlipping(false);
+    if (isWelcome) {
+      setIsWelcome(false);
+    }
+    setCurrentScene(flipScene);
+  }, [isWelcome, flipScene]);
+
+  const handleSceneChange = useCallback((newScene: 'forest' | 'ocean') => {
+    if (newScene === currentScene || isFlipping) return;
+    setFlipScene(newScene);
+    setFlipDirection(newScene === 'ocean' ? 'forward' : 'backward');
+    setIsFlipping(true);
+  }, [currentScene, isFlipping]);
 
   // Mouse position for parallax (normalized -1 to 1)
   useEffect(() => {
@@ -292,7 +310,7 @@ export default function Home() {
       <div className="absolute bottom-8 right-8 z-50">
         <CompassNav
           currentScene={currentScene}
-          onSwitch={() => setCurrentScene(prev => prev === 'forest' ? 'ocean' : 'forest')}
+          onSwitch={() => handleSceneChange(currentScene === 'forest' ? 'ocean' : 'forest')}
         />
       </div>
 
@@ -310,6 +328,14 @@ export default function Home() {
           onClose={handleCloseCard}
         />
       )}
+
+      {/* Page flip overlay */}
+      <PageFlipOverlay
+        isFlipping={isFlipping}
+        direction={flipDirection}
+        sceneContent={flipScene}
+        onFlipComplete={handleFlipComplete}
+      />
     </div>
   );
 }

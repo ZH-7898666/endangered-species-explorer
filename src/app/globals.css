@@ -1297,6 +1297,49 @@ body {
   to { width: 100%; }
 }
 
+/* ===== 翻书过渡动画 ===== */
+@keyframes flipPageForward {
+  0% {
+    transform: perspective(2000px) rotateY(0deg);
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  }
+  40% {
+    transform: perspective(2000px) rotateY(-30deg);
+    box-shadow: -20px 0 40px rgba(0,0,0,0.3);
+  }
+  100% {
+    transform: perspective(2000px) rotateY(-180deg);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+}
+
+@keyframes flipPageBackward {
+  0% {
+    transform: perspective(2000px) rotateY(0deg);
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  }
+  40% {
+    transform: perspective(2000px) rotateY(30deg);
+    box-shadow: 20px 0 40px rgba(0,0,0,0.3);
+  }
+  100% {
+    transform: perspective(2000px) rotateY(180deg);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+}
+
+@keyframes flipShadowForward {
+  0% { opacity: 0; }
+  30% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+@keyframes flipShadowBackward {
+  0% { opacity: 0; }
+  30% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
 @keyframes labelPeel {
   0%, 100% { transform: rotate(-2deg); }
   50% { transform: rotate(0deg); }
