@@ -35,6 +35,7 @@ interface BubbleState {
   wobbleAmp: number;
   riseSpeed: number;
   breathDuration: number;
+  vx: number;           // horizontal drift velocity
   active: boolean;
   respawnTimer: number | null;
   emerged: boolean;    // whether bubble has finished rising to targetY
@@ -212,6 +213,7 @@ export default function OceanScene({
       wobbleAmp: 4 + Math.random() * 8,
       riseSpeed: 0.15 + Math.random() * 0.1,
       breathDuration: 4 + Math.random() * 2,
+      vx: (Math.random() - 0.5) * 0.15,
       active: false,
       respawnTimer: null,
       emerged: false,
@@ -251,19 +253,30 @@ export default function OceanScene({
           return { ...b, emerging: true, active: true, opacity: 0.8 };
         }
         if (b.emerging && !b.emerged) {
+          let vx = b.vx + (Math.random() - 0.5) * 0.008;
+          vx *= 0.99;
+          const newX = b.x + vx;
           const newY = b.y - b.riseSpeed * 3; // rise faster during emergence
           if (newY <= b.targetY) {
-            return { ...b, y: b.targetY, emerged: true, emerging: false, opacity: 1 };
+            return { ...b, x: newX, y: b.targetY, emerged: true, emerging: false, opacity: 1, vx };
           }
-          return { ...b, y: newY };
+          return { ...b, x: newX, y: newY, vx };
         }
-        // Normal drift phase (emerged bubbles)
+        // Normal drift phase (emerged bubbles) - free floating with horizontal drift
         if (!b.active) return b;
-        const newY = b.y - b.riseSpeed * 0.3;  // very slow normal drift
+        let newVx = b.vx + (Math.random() - 0.5) * 0.01;
+        newVx += (50 - b.x) * 0.0002; // gentle center pull
+        newVx *= 0.98;
+        const maxVx = 0.2;
+        newVx = Math.max(-maxVx, Math.min(maxVx, newVx));
+        let newX = b.x + newVx;
+        if (newX < 5) { newX = 5; newVx = Math.abs(newVx) * 0.8; }
+        if (newX > 95) { newX = 95; newVx = -Math.abs(newVx) * 0.8; }
+        const newY = b.y - b.riseSpeed * 0.3;  // very slow normal upward drift
         if (newY < -8) {
-          return { ...b, y: 105, x: 8 + Math.random() * 84 };
+          return { ...b, y: 105, x: 8 + Math.random() * 84, vx: (Math.random() - 0.5) * 0.15 };
         }
-        return { ...b, y: newY };
+        return { ...b, y: newY, x: newX, vx: newVx };
       });
       setBubbles([...bubblesRef.current]);
     }, 80);

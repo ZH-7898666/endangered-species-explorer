@@ -122,8 +122,8 @@ export default function ForestScene({
     x: 8 + Math.random() * 82,
     y: 10 + Math.random() * 72,
     size: 22 + (index % 5) * 6,
-    vx: (Math.random() - 0.5) * 0.06,
-    vy: (Math.random() - 0.5) * 0.05,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.25,
     emoji: sp.emoji,
     speciesId: sp.id,
     breathPhase: Math.random() * Math.PI * 2,
@@ -170,20 +170,23 @@ export default function ForestScene({
       let visibilityChanged = false;
 
       spotsRef.current.forEach((spot) => {
-        // Drift logic
-        spot.vx += (Math.random() - 0.5) * 0.008;
-        spot.vy += (Math.random() - 0.5) * 0.008;
-        spot.vx *= 0.97;
-        spot.vy *= 0.97;
-        const maxV = 0.12;
+        // Free drift logic - noticeable wandering movement
+        spot.vx += (Math.random() - 0.5) * 0.025;
+        spot.vy += (Math.random() - 0.5) * 0.02;
+        // Gentle attraction toward center to prevent clustering at edges
+        spot.vx += (50 - spot.x) * 0.0003;
+        spot.vy += (45 - spot.y) * 0.0003;
+        spot.vx *= 0.985;
+        spot.vy *= 0.985;
+        const maxV = 0.35;
         spot.vx = Math.max(-maxV, Math.min(maxV, spot.vx));
         spot.vy = Math.max(-maxV, Math.min(maxV, spot.vy));
         spot.x += spot.vx;
         spot.y += spot.vy;
-        if (spot.x < 5) { spot.x = 5; spot.vx = Math.abs(spot.vx); }
-        if (spot.x > 95) { spot.x = 95; spot.vx = -Math.abs(spot.vx); }
-        if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy); }
-        if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy); }
+        if (spot.x < 5) { spot.x = 5; spot.vx = Math.abs(spot.vx) * 0.8; }
+        if (spot.x > 95) { spot.x = 95; spot.vx = -Math.abs(spot.vx) * 0.8; }
+        if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy) * 0.8; }
+        if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy) * 0.8; }
         spot.breathPhase += 0.025;
 
         // Emergence logic
