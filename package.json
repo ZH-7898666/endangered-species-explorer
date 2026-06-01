@@ -2,10 +2,6 @@
   "name": "endangered-species-explorer",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": "20.x",
-    "pnpm": ">=9.0.0"
-  },
   "scripts": {
     "dev": "bash ./scripts/dev.sh",
     "build": "next build",
