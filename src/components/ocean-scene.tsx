@@ -36,6 +36,7 @@ interface BubbleState {
   riseSpeed: number;
   breathDuration: number;
   vx: number;           // horizontal drift velocity
+  vy: number;           // vertical drift velocity
   active: boolean;
   respawnTimer: number | null;
   emerged: boolean;    // whether bubble has finished rising to targetY
@@ -214,6 +215,7 @@ export default function OceanScene({
       riseSpeed: 0.15 + Math.random() * 0.1,
       breathDuration: 4 + Math.random() * 2,
       vx: (Math.random() - 0.5) * 0.15,
+      vy: -0.01 - Math.random() * 0.03,
       active: false,
       respawnTimer: null,
       emerged: false,
@@ -253,8 +255,8 @@ export default function OceanScene({
           return { ...b, emerging: true, active: true, opacity: 0.8 };
         }
         if (b.emerging && !b.emerged) {
-          let vx = b.vx + (Math.random() - 0.5) * 0.008;
-          vx *= 0.99;
+          let vx = b.vx + (Math.random() - 0.5) * 0.03;
+          vx *= 0.97;
           const newX = b.x + vx;
           const newY = b.y - b.riseSpeed * 3; // rise faster during emergence
           if (newY <= b.targetY) {
@@ -264,19 +266,35 @@ export default function OceanScene({
         }
         // Normal drift phase (emerged bubbles) - free floating with horizontal drift
         if (!b.active) return b;
-        let newVx = b.vx + (Math.random() - 0.5) * 0.01;
-        newVx += (50 - b.x) * 0.0002; // gentle center pull
-        newVx *= 0.98;
-        const maxVx = 0.2;
+        let newVx = b.vx + (Math.random() - 0.5) * 0.025;
+        // Repulsion between bubbles to prevent lining up
+        bubblesRef.current.forEach(other => {
+          if (other.id === b.id || !other.active) return;
+          const dx = b.x - other.x;
+          const dy = b.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 18 && dist > 0.1) {
+            const force = (18 - dist) * 0.002;
+            newVx += (dx / dist) * force;
+          }
+        });
+        newVx *= 0.97;
+        const maxVx = 0.3;
         newVx = Math.max(-maxVx, Math.min(maxVx, newVx));
         let newX = b.x + newVx;
-        if (newX < 5) { newX = 5; newVx = Math.abs(newVx) * 0.8; }
-        if (newX > 95) { newX = 95; newVx = -Math.abs(newVx) * 0.8; }
-        const newY = b.y - b.riseSpeed * 0.3;  // very slow normal upward drift
+        if (newX < 3) { newX = 3; newVx = Math.abs(newVx) * 0.6; }
+        if (newX > 97) { newX = 97; newVx = -Math.abs(newVx) * 0.6; }
+        let newVy = b.vy + (Math.random() - 0.52) * 0.008;  // slightly biased upward
+        newVy *= 0.98;  // dampen
+        newVy = Math.max(-0.08, Math.min(0.03, newVy));  // mostly upward, occasional slight sink
+        const newY = b.y + newVy;
         if (newY < -8) {
-          return { ...b, y: 105, x: 8 + Math.random() * 84, vx: (Math.random() - 0.5) * 0.15 };
+          return { ...b, y: 105, x: 8 + Math.random() * 84, vx: (Math.random() - 0.5) * 0.15, vy: -0.01 - Math.random() * 0.03 };
         }
-        return { ...b, y: newY, x: newX, vx: newVx };
+        if (newY > 95) {  // don't drift below visible area
+          newVy = -Math.abs(newVy) * 0.5;
+        }
+        return { ...b, y: newY, x: newX, vx: newVx, vy: newVy };
       });
       setBubbles([...bubblesRef.current]);
     }, 80);

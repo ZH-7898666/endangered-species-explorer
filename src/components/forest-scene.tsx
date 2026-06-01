@@ -170,23 +170,32 @@ export default function ForestScene({
       let visibilityChanged = false;
 
       spotsRef.current.forEach((spot) => {
-        // Free drift logic - noticeable wandering movement
-        spot.vx += (Math.random() - 0.5) * 0.025;
-        spot.vy += (Math.random() - 0.5) * 0.02;
-        // Gentle attraction toward center to prevent clustering at edges
-        spot.vx += (50 - spot.x) * 0.0003;
-        spot.vy += (45 - spot.y) * 0.0003;
+        // Free drift logic - wandering movement across the whole scene
+        spot.vx += (Math.random() - 0.5) * 0.03;
+        spot.vy += (Math.random() - 0.5) * 0.025;
+        // Repulsion between spots to prevent clustering
+        spotsRef.current.forEach(other => {
+          if (other.id === spot.id) return;
+          const dx = spot.x - other.x;
+          const dy = spot.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 15 && dist > 0.1) { // too close → push apart
+            const force = (15 - dist) * 0.003;
+            spot.vx += (dx / dist) * force;
+            spot.vy += (dy / dist) * force;
+          }
+        });
         spot.vx *= 0.985;
         spot.vy *= 0.985;
-        const maxV = 0.35;
+        const maxV = 0.25;
         spot.vx = Math.max(-maxV, Math.min(maxV, spot.vx));
         spot.vy = Math.max(-maxV, Math.min(maxV, spot.vy));
         spot.x += spot.vx;
         spot.y += spot.vy;
-        if (spot.x < 5) { spot.x = 5; spot.vx = Math.abs(spot.vx) * 0.8; }
-        if (spot.x > 95) { spot.x = 95; spot.vx = -Math.abs(spot.vx) * 0.8; }
-        if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy) * 0.8; }
-        if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy) * 0.8; }
+        if (spot.x < 5) { spot.x = 5; spot.vx = Math.abs(spot.vx) * 0.6; }
+        if (spot.x > 95) { spot.x = 95; spot.vx = -Math.abs(spot.vx) * 0.6; }
+        if (spot.y < 5) { spot.y = 5; spot.vy = Math.abs(spot.vy) * 0.6; }
+        if (spot.y > 88) { spot.y = 88; spot.vy = -Math.abs(spot.vy) * 0.6; }
         spot.breathPhase += 0.025;
 
         // Emergence logic
